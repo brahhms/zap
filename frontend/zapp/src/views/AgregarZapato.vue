@@ -1,5 +1,22 @@
 <template>
   <div class="agregar">
-    <h1>agregar zapato</h1>
+    <detalle-pedido></detalle-pedido>
   </div>
 </template>
+
+
+<script>
+
+import DetallePedido from "../components/DetalleCliente.vue";
+
+export default {
+  components: {
+    DetallePedido
+  },
+
+  data: () => ({
+    //
+  }),
+  
+};
+</script>
