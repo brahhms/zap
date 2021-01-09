@@ -4,28 +4,30 @@
       <v-container>
         <v-row>
           <v-col cols="4">
-            <v-card class="tarjeta">
-              <v-btn text :to="{name: 'NuevoPedido'}">Nuevo Pedido</v-btn>
+            <v-card  class="tarjeta">
+              <v-btn min-height="100%" block class="opcion" text :to="{ name: 'NuevoPedido' }">Nuevo Pedido</v-btn>
             </v-card>
           </v-col>
           <v-col cols="4">
             <v-card class="tarjeta">
-              <v-btn text :to="{name: 'AgregarZapato'}">Agregar Zapato</v-btn>
+              <v-btn min-height="100%" block text :to="{ name: 'AgregarZapato' }">Agregar Zapato</v-btn>
             </v-card>
           </v-col>
           <v-col cols="4">
             <v-card class="tarjeta">
-              <v-btn text :to="{name: 'AgregarMaterial'}">Agregar Material</v-btn>
+              <v-btn min-height="100%" block text :to="{ name: 'AgregarMaterial' }"
+                >Agregar Material</v-btn
+              >
             </v-card>
           </v-col>
           <v-col cols="4">
             <v-card class="tarjeta">
-              <v-btn text :to="{name: 'AgregarForro'}">Agregar Forro</v-btn>
+              <v-btn min-height="100%" block text :to="{ name: 'AgregarForro' }">Agregar Forro</v-btn>
             </v-card>
           </v-col>
           <v-col cols="4">
             <v-card class="tarjeta">
-              <v-btn text :to="{name: 'AgregarSuela'}">Agregar Suela</v-btn>
+              <v-btn min-height="100%" block text :to="{ name: 'AgregarSuela' }">Agregar Suela</v-btn>
             </v-card>
           </v-col>
         </v-row>
@@ -43,6 +45,8 @@ export default {
 
 <style scoped>
 .tarjeta {
-  height: 200px;
+  height: 150px;
 }
+
+
 </style>

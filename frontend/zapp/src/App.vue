@@ -21,9 +21,7 @@
       <v-spacer></v-spacer>
 
       <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
+        :to="{ name: 'Home' }"     
       >
         <span class="mr-2">Regresar al Home</span>
         <v-icon>mdi-open-in-new</v-icon>

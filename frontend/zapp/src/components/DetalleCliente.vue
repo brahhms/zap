@@ -1,123 +1,116 @@
 <template>
- <v-card flat>
-    <v-snackbar
-      v-model="snackbar"
-      absolute
-      top
-      right
-      color="success"
-    >
-      <span>Registration successful!</span>
-      <v-icon dark>
-        mdi-checkbox-marked-circle
-      </v-icon>
-    </v-snackbar>
-    <v-form
-      ref="form"
-      @submit.prevent="submit"
-    >
-      <v-container fluid>
-        <v-row>
-          <v-col
-            cols="12"
-            sm="6"
+  <v-card class="mx-auto" max-width="500" flat>
+    <v-card-title class="title font-weight-regular justify-space-between">
+      <span>{{ currentTitle }}</span>
+      <v-avatar
+        color="primary lighten-2"
+        class="subheading white--text"
+        size="24"
+        v-text="step"
+      ></v-avatar>
+    </v-card-title>
+
+    <v-window v-model="step">
+      <v-window-item :value="1">
+        <v-card-text>
+          <v-autocomplete
+            auto-select-first
+            clearable
+            label="Cliente"
+            :items="clientes"
+            v-model="pedido.cliente"
           >
-            <v-text-field
-              v-model="form.first"
-              :rules="rules.name"
-              color="purple darken-2"
-              label="Nombres"
-              required
-            ></v-text-field>
-          </v-col>
-          <v-col
-            cols="12"
-            sm="6"
+            <v-icon slot="prepend" color="primary"> mdi-account </v-icon>
+            <template v-slot:item="data">
+              {{ data.item.nombre }}
+            </template>
+            <template v-slot:selection="data">
+              {{ data.item.nombre }}
+            </template>
+          </v-autocomplete>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            @click="
+              step++;
+              pedido.cliente = null;
+            "
           >
-            <v-text-field
-              v-model="form.last"
-              :rules="rules.name"
-              color="blue darken-2"
-              label="Apellidos"
-              required
-            ></v-text-field>
-          </v-col>
-         
- 
-        </v-row>
-      </v-container>
-      <v-card-actions>
-        <v-btn
-          text
-          @click="resetForm"
-        >
-          Cancel
-        </v-btn>
-        <v-spacer></v-spacer>
-        <v-btn
-          :disabled="!formIsValid"
-          text
-          color="primary"
-          type="submit"
-        >
-          Register
-        </v-btn>
-      </v-card-actions>
-    </v-form>
-    
+            Crear Nuevo Cliente
+          </v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-window-item>
+
+      <v-window-item :value="2">
+        <v-card-text>
+          <v-text-field
+            label="Nombre"
+            v-model="cliente.nombre"
+            type="text"
+          ></v-text-field>
+          <v-text-field
+            label="Telefono"
+            v-model="cliente.telefono"
+            type="text"
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            @click="
+              step--;
+              limpiarCliente();
+            "
+          >
+            Regresar
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" depressed @click="setCliente(cliente)">
+            Crear
+          </v-btn>
+        </v-card-actions>
+      </v-window-item>
+    </v-window>
   </v-card>
 </template>
 
 <script>
-  export default {
-    data () {
-      const defaultForm = Object.freeze({
-        first: '',
-        last: '',
-        bio: '',
-        favoriteAnimal: '',
-        age: null,
-        terms: false,
-      })
+import { mapMutations, mapState } from "vuex";
+export default {
+  data: () => ({
+    step: 1,
+    cliente: { nombre: "", telefono: "" },
+  }),
 
-      return {
-        form: Object.assign({}, defaultForm),
-        rules: {
-          age: [
-            val => val < 10 || `I don't believe you!`,
-          ],
-          animal: [val => (val || '').length > 0 || 'This field is required'],
-          name: [val => (val || '').length > 0 || 'This field is required'],
-        },
-        animals: ['Dog', 'Cat', 'Rabbit', 'Turtle', 'Snake'],
-        conditions: false,
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc.',
-        snackbar: false,
-        terms: false,
-        defaultForm,
+  computed: {
+    ...mapState(["pedido"]),
+    clientes() {
+      let clients = [
+        { nombre: "juan", telefono: "89897654" },
+        { nombre: "jose", telefono: "37872829" },
+      ];
+
+      return clients;
+    },
+    currentTitle() {
+      switch (this.step) {
+        case 1:
+          return "Selecciona un Cliente";
+        case 2:
+          return "Crea un Cliente Nuevo";
+        default:
+          return "";
       }
     },
-
-    computed: {
-      formIsValid () {
-        return (
-          this.form.first &&
-          this.form.last &&
-          this.form.favoriteAnimal &&
-          this.form.terms
-        )
-      },
+  },
+  methods: {
+    ...mapMutations(["setCliente"]),
+    limpiarCliente() {
+      this.cliente = { nombre: "", telefono: "" };
+      this.pedido.cliente = null;
     },
-
-    methods: {
-      resetForm () {
-        this.form = Object.assign({}, this.defaultForm)
-        this.$refs.form.reset()
-      },
-      submit () {
-        this.snackbar = true
-        this.resetForm()
-      },
-    },
-  }
+  },
+};
 </script>

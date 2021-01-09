@@ -7,7 +7,7 @@
 
 <script>
 
-import DetallePedido from "../components/DetalleCliente.vue";
+import DetallePedido from "../components/SelectorTalla.vue";
 
 export default {
   components: {
