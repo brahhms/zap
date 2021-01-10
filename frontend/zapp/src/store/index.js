@@ -7,107 +7,82 @@ export default new Vuex.Store({
   state: {
     pedido: {
       cliente: null,
-      detallePedido: [
-        {
-          cod: "RS",
-          material: { nombre: "cemento", color: "azul" },
-          tallas: [
-            {
-              cuatro: 4,
-              cinco: 0,
-              seis: 0,
-              siete: 4,
-              ocho: 5,
-              nueve: 0,
-              diez: 0,
-            },
-          ],
-          horma: "op",
-          forro: { nombre: "tricoth", color: "gris" },
-          suela: { nombre: "1122", color: "gun" },
-        },
-        {
-          cod: "TA",
-          material: { nombre: "madera", color: "nieve" },
-          tallas: [
-            {
-              cuatro: 4,
-              cinco: 0,
-              seis: 0,
-              siete: 4,
-              ocho: 5,
-              nueve: 0,
-              diez: 0,
-            },
-          ],
-          horma: "op",
-          forro: { nombre: "tricoth", color: "gris" },
-          suela: { nombre: "1122", color: "gun" },
-        },
-        {
-          cod: "T12",
-          material: { nombre: "acero", color: "durazno" },
-          tallas: [
-            {
-              cuatro: 4,
-              cinco: 0,
-              seis: 0,
-              siete: 4,
-              ocho: 5,
-              nueve: 0,
-              diez: 0,
-            },
-          ],
-          horma: "op",
-          forro: { nombre: "tricoth", color: "gris" },
-          suela: { nombre: "1122", color: "gun" },
-        },
-        {
-          cod: "SA378",
-          material: { nombre: "tela", color: "amarillo" },
-          tallas: [
-            {
-              cuatro: 4,
-              cinco: 0,
-              seis: 0,
-              siete: 4,
-              ocho: 5,
-              nueve: 0,
-              diez: 0,
-            },
-          ],
-          horma: "op",
-          forro: { nombre: "tricoth", color: "gris" },
-          suela: { nombre: "1122", color: "gun" },
-        },
-        {
-          cod: "RS54",
-          material: { nombre: "cuero", color: "verde" },
-          tallas: [
-            {
-              cuatro: 4,
-              cinco: 0,
-              seis: 0,
-              siete: 4,
-              ocho: 5,
-              nueve: 0,
-              diez: 0,
-            },
-          ],
-          horma: "op",
-          forro: { nombre: "tricoth", color: "gris" },
-          suela: { nombre: "1122", color: "gun" },
-        },
-      ],
+      detallePedido: null,
     },
+    tallas: [{
+      nombre: "4"
+    }, {
+      nombre: "5"
+    }, {
+      nombre: "6"
+    }, {
+      nombre: "7"
+    }, {
+      nombre: "8"
+    }, {
+      nombre: "9"
+    }, {
+      nombre: "10"
+    }],
+    estilos:["TA3", "TA2", "TA6", "R101", "R102", "R70"],
+
   },
   mutations: {
-    setCliente(state,cliente){
-      state.pedido.cliente = cliente;
-    }
+
+    crearDetallePedido(state, cantidadPedidos) {
+      state.pedido.detallePedido = [];
+
+      for (let i = 0; i < cantidadPedidos; i++) {
+        state.pedido.detallePedido.push({
+          estilo: "EE",
+          material: {
+            nombre: "ejMaterial",
+            color: "ejColorMaterial"
+          },
+          detalleTallas: [{
+              nombre: "4",
+              cantidad: 0
+            },
+            {
+              nombre: "5",
+              cantidad: 0
+            },
+            {
+              nombre: "6",
+              cantidad: 0
+            },
+            {
+              nombre: "7",
+              cantidad: 0
+            },
+            {
+              nombre: "8",
+              cantidad: 0
+            },
+            {
+              nombre: "9",
+              cantidad: 0
+            },
+            {
+              nombre: "10",
+              cantidad: 0
+            }
+
+          ],
+          horma: "ejHorma",
+          forro: {
+            nombre: "ejForro",
+            color: "ejColorForro"
+          },
+          suela: {
+            nombre: "ejSuela",
+            color: "ejColorSuela"
+          },
+        });
+      }
+
+    },
   },
-  actions: {
-  },
-  modules: {
-  }
+  actions: {},
+  modules: {}
 })

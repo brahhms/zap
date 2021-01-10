@@ -83,7 +83,7 @@
 <script>
 import DetallePedido from "../components/DetallePedido.vue";
 import DetalleCliente from "../components/DetalleCliente.vue";
-import { mapState } from "vuex";
+import { mapMutations, mapState } from "vuex";
 
 export default {
   components: {
@@ -98,10 +98,16 @@ export default {
       snackText: "",
     };
   },
-  methods: {},
+  methods: {
+    ...mapMutations(["crearDetallePedido"])
+    ,
+  },
   computed: {
     ...mapState(["pedido"]),
   },
+  created(){
+    this.crearDetallePedido(1);
+  }
 };
 </script>
 

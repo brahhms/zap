@@ -9,23 +9,23 @@
       }}</v-toolbar-title>
     </v-app-bar>
 
-    <v-data-table :headers="headers" :items="pedido.detallePedido">
-      <template v-slot:item.cod="props">
+    <v-data-table :headers="headers" :items="pedido.detallePedido" hide-default-footer>
+      <template v-slot:item.codigo="props">
         <v-edit-dialog
-          :return-value.sync="props.item.cod"
+          :return-value.sync="props.item"
           @save="save"
           @cancel="cancel"
           @open="open"
           @close="close"
         >
-          {{ props.item.cod }}
+          {{ props.item.estilo }}
           <template v-slot:input>
             <v-container class="mt-3">
               <v-autocomplete
-                v-model="props.item.cod"
+                v-model="props.item.estilo"
                 :rules="[max6chars]"
                 label="codigo"
-                :items="datos.cods"
+                :items="estilos"
                 clearable
                 dense
                 filled
@@ -69,8 +69,25 @@
         </v-edit-dialog>
       </template>
 
-      <template v-slot:item.tallas>
-        <selector-talla></selector-talla>
+      <template v-slot:item.tallas="props">
+        <v-dialog>
+          <template v-slot:activator="{ on }">
+            <v-container class="d-flex flex-row" v-on="on">
+              <div
+                class="pa-1"
+                v-for="t in props.item.detalleTallas"
+                :key="t.nombre"
+              >
+                <v-chip v-if="t.cantidad > 0"
+                  >{{ t.cantidad }}/{{ t.nombre }}</v-chip
+                >
+              </div>
+            </v-container>
+          </template>
+          <selector-talla
+            :detalleTallas="props.item.detalleTallas"
+          ></selector-talla>
+        </v-dialog>
       </template>
 
       <template v-slot:item.forro="props">
@@ -149,11 +166,9 @@
 
 <script>
 import { mapState } from "vuex";
-import SelectorTalla from "./SelectorTalla.vue";
+import SelectorTalla from "../components/SelectorTalla.vue";
 export default {
-  components: {
-    SelectorTalla
-  },
+  components: { SelectorTalla },
   data: () => ({
     max6chars: (v) => v.length <= 6 || "Codigo demasiado largo!",
     pagination: {},
@@ -162,7 +177,7 @@ export default {
         text: "Codigo",
         align: "start",
         sortable: false,
-        value: "cod",
+        value: "codigo",
       },
       {
         text: "Material",
@@ -175,7 +190,6 @@ export default {
         align: "start",
         sortable: false,
         value: "tallas",
-        width: 7,
       },
       {
         text: "Horma",
@@ -198,7 +212,6 @@ export default {
     ],
 
     datos: {
-      cods: ["TA3", "TA2", "TA6", "R101", "R102", "R70"],
       materiales: {
         durazno: ["negro", "uva", "beige", "gena", "rosa vieja", "azul"],
         cuero: ["negro", "cafe"],
@@ -223,7 +236,7 @@ export default {
   },
 
   computed: {
-    ...mapState(["pedido"]),
+    ...mapState(["pedido","estilos"]),
     materiales() {
       return Object.keys(this.datos.materiales);
     },
