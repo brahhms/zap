@@ -1,10 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
+    <v-app-bar v-if="showBar" app color="primary" dark>
       <div class="d-flex align-center">
         <v-img
           alt="Vuetify Logo"
@@ -20,9 +16,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn
-        :to="{ name: 'Home' }"     
-      >
+      <v-btn :to="{ name: 'Home' }">
         <span class="mr-2">Regresar al Home</span>
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
@@ -37,16 +31,16 @@
 </template>
 
 <script>
-
+import { mapState } from 'vuex';
 export default {
-  name: 'App',
+  name: "App",
 
-  components: {
-
-  },
+  components: {},
 
   data: () => ({
-    //
   }),
+  computed:{
+    ...mapState(["showBar"])
+  }
 };
 </script>

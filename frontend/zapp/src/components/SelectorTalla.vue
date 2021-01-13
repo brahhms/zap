@@ -2,13 +2,14 @@
   <v-data-table dense :headers="headers" :items="[1]" hide-default-footer>
     <template v-slot:item>
       <tr>
-        <td v-for="t in detalleTallas" :key="t.nombre">
+        <td v-for="t in detalleTallas" :key="t.talla._id">
           <v-text-field
             v-model.lazy.number="t.cantidad"
             flat
             hide-details
             dense
             :value="t.cantidad"
+            @change="calcularSubtotales"
           ></v-text-field>
         </td>
       </tr>
@@ -19,36 +20,36 @@
 
 
 <script>
-import { mapState } from "vuex";
-export default {
-  props:["detalleTallas"],
-  data() {
-    return {
+import { createNamespacedHelpers } from "vuex";
+const { mapGetters,mapMutations } = createNamespacedHelpers("pedido");
 
-    };
+export default {
+  props: ["detalleTallas"],
+  data() {
+    return {};
   },
-  methods: {},
+  methods: {
+    ...mapMutations(["calcularSubtotales"])
+  },
 
   computed: {
-    ...mapState(["tallas","pedido"]),
+    ...mapGetters(["tallas"]),
     headers() {
-      let titulos = [];
+      let lista = [];
       this.tallas.forEach((element) => {
-        titulos.push({
+        lista.push({
           text: element.nombre,
           align: "center",
           sortable: false,
-          value: "cuatro",
+          value: element.nombre,
           width: 5,
           divider: true,
         });
       });
 
-      return titulos;
+      return lista;
     },
   },
-  created: function () {
-    console.log(this.pedido);
-  },
+  created() {},
 };
 </script>

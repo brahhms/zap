@@ -6,6 +6,7 @@ import AgregarForro from '../views/AgregarForro.vue'
 import AgregarMaterial from '../views/AgregarMaterial.vue'
 import AgregarSuela from '../views/AgregarSuela.vue'
 import AgregarZapato from '../views/AgregarZapato.vue'
+import VistaPrevia from '../components/VistaPrevia.vue'
 
 Vue.use(VueRouter)
 
@@ -39,6 +40,11 @@ const routes = [
     path: '/agregarZapato',
     name: 'AgregarZapato',
     component: AgregarZapato
+  },
+  {
+    path: '/vistaPrevia',
+    name: 'VistaPrevia',
+    component: VistaPrevia
   }
 
 ]

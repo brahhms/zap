@@ -18,7 +18,8 @@
             clearable
             label="Cliente"
             :items="clientes"
-            v-model="pedido.cliente"
+            v-model="seleccionado"
+            @change="setCliente(seleccionado)"
           >
             <v-icon slot="prepend" color="primary"> mdi-account </v-icon>
             <template v-slot:item="data">
@@ -34,7 +35,8 @@
             color="primary"
             @click="
               step++;
-              pedido.cliente = null;
+              setCliente(null);
+              seleccionado = null;
             "
           >
             Crear Nuevo Cliente
@@ -67,7 +69,14 @@
             Regresar
           </v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="primary" depressed @click="setCliente(cliente)">
+          <v-btn
+            color="primary"
+            depressed
+            @click="
+              saveCliente(cliente);
+              setCliente(cliente);
+            "
+          >
             Crear
           </v-btn>
         </v-card-actions>
@@ -77,23 +86,19 @@
 </template>
 
 <script>
-import { mapMutations, mapState } from "vuex";
+import { createNamespacedHelpers } from "vuex";
+const { mapGetters, mapMutations } = createNamespacedHelpers("cliente");
+const { mapMutations: pedidoMapMutations } = createNamespacedHelpers("pedido");
+
 export default {
   data: () => ({
     step: 1,
-    cliente: { nombre: "", telefono: "" },
+    cliente: { nombre: null, telefono: null, direccion: null },
+    seleccionado: null,
   }),
 
   computed: {
-    ...mapState(["pedido"]),
-    clientes() {
-      let clients = [
-        { nombre: "juan", telefono: "89897654" },
-        { nombre: "jose", telefono: "37872829" },
-      ];
-
-      return clients;
-    },
+    ...mapGetters(["clientes"]),
     currentTitle() {
       switch (this.step) {
         case 1:
@@ -106,11 +111,12 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["setCliente"]),
+    ...mapMutations(["saveCliente"]),
+    ...pedidoMapMutations(["setCliente"]),
     limpiarCliente() {
-      this.cliente = { nombre: "", telefono: "" };
-      this.pedido.cliente = null;
+      this.cliente = { nombre: "", telefono: "", direccion: "" };
     },
   },
+  created: function () {},
 };
 </script>
