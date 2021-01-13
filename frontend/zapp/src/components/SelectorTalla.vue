@@ -9,7 +9,6 @@
             hide-details
             dense
             :value="t.cantidad"
-            @change="calcularSubtotales"
           ></v-text-field>
         </td>
       </tr>
@@ -21,7 +20,7 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters,mapMutations } = createNamespacedHelpers("pedido");
+const { mapGetters } = createNamespacedHelpers("pedido");
 
 export default {
   props: ["detalleTallas"],
@@ -29,7 +28,6 @@ export default {
     return {};
   },
   methods: {
-    ...mapMutations(["calcularSubtotales"])
   },
 
   computed: {

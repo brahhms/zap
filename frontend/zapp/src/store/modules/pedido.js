@@ -101,7 +101,7 @@ export default {
       "_id": "4bce85615b36787c9bc135d3e5003d30",
       "_rev": "2-aba6eabf542c1cbe2fa8c7c0c48392cd",
       "nombre": "durazno",
-      "color":"negro",
+      "defaultColor": "negro",
       "colores": [
         "negro",
         "uva",
@@ -115,6 +115,7 @@ export default {
       "_id": "4bce85615b36787c9bc135d3e500d4ce",
       "_rev": "1-2edb8962e797195bc87ef02a676cc636",
       "nombre": "tricot",
+      "defaultColor": "gris",
       "colores": [
         "negro",
         "gris"
@@ -124,6 +125,7 @@ export default {
       "_id": "4bce85615b36787c9bc135d3e500d924",
       "_rev": "2-323fa7e587a303a323c50b268b9faff6",
       "nombre": "op",
+      "defaultColor": "negro",
       "colores": [
         "gun",
         "negro"
@@ -137,37 +139,36 @@ export default {
 
   },
   mutations: {
-    agregarDetalles(state, cantidadPedidos) {
+    agregarDetalleDefault(state) {
 
-      for (let i = 0; i < cantidadPedidos; i++) {
-        state.pedido.detalle.push(
+      state.pedido.detalle.push(
 
-          {
-            estilo: null,
-            detalleMaterial: {
-              material: null,
-              color: null
-            },
-            detalleTallas: state.tallas.map(t => {
+        {
+          estilo: state.estilos[0],
+          detalleMaterial: {
+            material: state.materiales[0],
+            color: state.materiales[0].defaultColor
+          },
+          detalleTallas: state.tallas.map(t => {
+            return {
+              talla: t,
+              cantidad: 0
+            };
+          }),
+          horma: state.hormas[0],
+          detalleForro: {
+            forro: state.forros[0],
+            color: state.forros[0].defaultColor
+          },
+          detalleSuela: {
+            suela: state.suelas[0],
+            color: state.suelas[0].defaultColor
+          },
+          subtotal: 0
+        }
 
-              return {
-                talla: t,
-                cantidad: 0
-              };
-            }),
-            detalleForro: {
-              forro: null,
-              color: null
-            },
-            detalleSuela: {
-              suela: null,
-              color: null
-            },
-            subtotal: 0
-          }
+      );
 
-        );
-      }
 
     },
     setCliente(state, cliente) {
@@ -178,17 +179,8 @@ export default {
         console.log("no ha seleccionado ningun cliente");
       }
 
-    },
-    calcularSubtotales(state) {
-      state.pedido.detalle.forEach(detalle => {
-        let subtotal = 0;
-        detalle.detalleTallas.forEach((talla) => {
-          subtotal += talla.cantidad;
-        });
-        detalle.subtotal = subtotal;
-      });
-
     }
+
   },
   actions: {},
   getters: {

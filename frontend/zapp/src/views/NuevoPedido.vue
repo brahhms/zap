@@ -38,7 +38,30 @@
 
         <v-stepper-content step="2">
           <v-card class="mb-12" color="grey lighten-1">
-            <detalle-pedido></detalle-pedido>
+            <div v-if="clienteSeleccionado != null">
+              <v-app-bar dense flat color="white">
+                <v-btn icon>
+                  <v-icon>mdi-account</v-icon>
+                </v-btn>
+                <v-toolbar-title>{{
+                  clienteSeleccionado.nombre
+                }}</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-btn icon @click="agregarDetalleDefault()">
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </v-app-bar>
+
+              <v-data-table
+                :headers="headers"
+                :items="pedido.detalle"
+                hide-default-footer
+              >
+                <template v-slot:item="{ item }">
+                  <detalle-pedido :detalle="item"></detalle-pedido>
+                </template>
+              </v-data-table>
+            </div>
           </v-card>
           <v-card-actions>
             <v-btn color="primary" depressed x-large @click="e1--">
@@ -69,8 +92,9 @@
 import DetallePedido from "../components/DetallePedido.vue";
 import DetalleCliente from "../components/DetalleCliente.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters } = createNamespacedHelpers("pedido");
-
+const { mapGetters, mapMutations, mapState } = createNamespacedHelpers(
+  "pedido"
+);
 
 export default {
   components: {
@@ -80,16 +104,64 @@ export default {
   data() {
     return {
       e1: 1,
+      headers: [
+        {
+          text: "Estilo",
+          align: "start",
+          sortable: false,
+          value: "estilo",
+          width: 3,
+        },
+        {
+          text: "Material",
+          align: "start",
+          sortable: false,
+          value: "material",
+        },
+        {
+          text: "Tallas",
+          align: "start",
+          sortable: false,
+          value: "tallas",
+        },
+        {
+          text: "Horma",
+          align: "start",
+          sortable: false,
+          value: "horma",
+          width: 3,
+        },
+        {
+          text: "Forro",
+          align: "start",
+          sortable: false,
+          value: "forro",
+        },
+        {
+          text: "Suela",
+          align: "start",
+          sortable: false,
+          value: "suela",
+        },
+        {
+          text: "Subtotal",
+          align: "center",
+          sortable: false,
+          value: "subtotal",
+          width: 2,
+        },
+      ],
     };
   },
   methods: {
-
+    ...mapMutations(["agregarDetalleDefault"]),
   },
   computed: {
     ...mapGetters(["clienteSeleccionado"]),
+    ...mapState(["pedido"]),
   },
   created() {
-    
+    this.agregarDetalleDefault();
   },
 };
 </script>
