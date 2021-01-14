@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import NuevoPedido from '../views/NuevoPedido.vue'
 import AgregarForro from '../views/AgregarForro.vue'
-import AgregarMaterial from '../views/AgregarMaterial.vue'
+import MantenimientoMaterial from '../views/MantenimientoMaterial.vue'
 import AgregarSuela from '../views/AgregarSuela.vue'
 import MantenimientoEstilo from '../views/MantenimientoEstilo.vue'
 import VistaPrevia from '../components/VistaPrevia.vue'
@@ -27,9 +27,9 @@ const routes = [
     component: AgregarForro
   },
   {
-    path: '/agregarMaterial',
-    name: 'AgregarMaterial',
-    component: AgregarMaterial
+    path: '/mantenimientoMaterial',
+    name: 'MantenimientoMaterial',
+    component: MantenimientoMaterial
   },
   {
     path: '/agregarSuela',

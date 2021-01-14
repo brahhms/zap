@@ -1,15 +1,15 @@
 <template>
-  <div class="estilo">
+  <div class="material">
     <v-data-table :headers="headers" :items="items" class="elevation-1">
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>ESTILOS</v-toolbar-title>
+          <v-toolbar-title>MATERIALES</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Estilo
+                Nuevo Material
               </v-btn>
             </template>
             <v-card>
@@ -20,34 +20,29 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="6" md="4">
+                    <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.codigo"
-                        label="Codigo"
+                        v-model="editedItem.nombre"
+                        label="Nombre"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.descripcion"
-                        label="Descripcion"
-                      ></v-text-field>
+                    <v-col cols="12">
+                      <v-combobox
+                        v-model="editedItem.colores"
+                        :items="colores"
+                        label="Colores"
+                        multiple
+                        chips
+                      ></v-combobox>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-checkbox
-                        v-model="editedItem.tacon"
-                        label="Tacon"
-                        color="primary"
-                        hide-details
-                      ></v-checkbox>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-file-input
-                        label="Imagen"
-                        v-model="editedItem._attachments"
-                        show-size
-                        small-chips
-                        truncate-length="9"
-                      ></v-file-input>
+
+                    <v-col cols="12">
+                      <v-select
+                        v-if="editedItem.colores"
+                        :items="editedItem.colores"
+                        v-model="editedItem.defaultColor"
+                        label="Color default"
+                      ></v-select>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -67,7 +62,7 @@
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Desea eliminar este estilo?</v-card-title
+                >Desea eliminar este material?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -90,14 +85,12 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
-      <template v-slot:item.tacon="{ item }">
-        <v-simple-checkbox v-model="item.tacon" disabled></v-simple-checkbox>
-      </template>
-      <template v-slot:item.img="{ item }">
-        <span v-if="item._attachments">
-          {{ Object.keys(item._attachments)[0] }}</span
-        >
-        <span v-else>sin imagen</span>
+      <template v-slot:item.colores="{ item }">
+        <div v-if="item.colores">
+          <v-chip v-for="color in item.colores" :key="color">{{
+            color
+          }}</v-chip>
+        </div>
       </template>
     </v-data-table>
   </div>
@@ -108,57 +101,62 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("estilo");
+const { mapGetters, mapActions } = createNamespacedHelpers("material");
 export default {
   data: () => ({
     dialog: false,
     dialogDelete: false,
     headers: [
       {
-        text: "Codigo",
+        text: "Nombre",
         align: "start",
         sortable: false,
-        value: "codigo",
+        value: "nombre",
       },
       {
-        text: "Descripcion",
+        text: "Default color",
         align: "start",
         sortable: false,
-        value: "descripcion",
+        value: "defaultColor",
       },
       {
-        text: "Tacon",
+        text: "Colores",
         align: "start",
         sortable: false,
-        value: "tacon",
-      },
-      {
-        text: "Imagen",
-        align: "start",
-        sortable: false,
-        value: "img",
+        value: "colores",
       },
       { text: "Acciones", value: "actions", sortable: false },
     ],
     items: [],
     editedIndex: -1,
     editedItem: {
-      codigo: "",
-      descripcion: "",
-      tacon: false,
+      nombre: "",
+      defaultColor: "",
+      colores: [],
     },
     defaultItem: {
-      codigo: "",
-      descripcion: "",
-      tacon: false,
+      nombre: "",
+      defaultColor: "",
+      colores: [],
     },
+    colores: [
+      "azul",
+      "verde",
+      "rojo",
+      "cafe",
+      "negro",
+      "blanco",
+      "morado",
+      "celeste",
+      "gris",
+    ],
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["estilos"]),
+    ...mapGetters(["materiales"]),
   },
 
   watch: {
@@ -175,17 +173,21 @@ export default {
   },
 
   methods: {
-    ...mapActions(["getEstilos", "updateEstilo", "saveEstilo", "deleteEstilo"]),
+    ...mapActions([
+      "getMateriales",
+      "updateMaterial",
+      "saveMaterial",
+      "deleteMaterial",
+    ]),
     initialize() {
-      this.getEstilos();
-      this.items = this.estilos.map((estilo) => {
+      this.getMateriales();
+      this.items = this.materiales.map((material) => {
         return {
-          _id: estilo._id,
-          _rev: estilo._rev,
-          codigo: estilo.codigo,
-          descripcion: estilo.descripcion,
-          tacon: estilo.tacon,
-          _attachments: estilo._attachments,
+          _id: material._id,
+          _rev: material._rev,
+          nombre: material.nombre,
+          defaultColor: material.defaultColor,
+          colores: material.colores,
         };
       });
     },
@@ -203,7 +205,7 @@ export default {
     },
 
     deleteItemConfirm() {
-      this.deleteEstilo(this.editedItem);
+      this.deleteMaterial(this.editedItem);
       this.items.splice(this.editedIndex, 1);
       this.closeDelete();
     },
@@ -228,12 +230,12 @@ export default {
       if (this.editedIndex > -1) {
         //editar
         Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateEstilo(this.editedItem);
+        this.updateMaterial(this.editedItem);
       } else {
         //guardar
         this.items.push(this.editedItem);
         console.log(this.editedItem);
-        this.saveEstilo(this.editedItem);
+        this.saveMaterial(this.editedItem);
       }
       this.close();
     },

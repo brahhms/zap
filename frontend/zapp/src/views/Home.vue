@@ -5,7 +5,7 @@
         <v-row>
           <v-col cols="4">
             <v-card  class="tarjeta">
-              <v-btn min-height="100%" block class="opcion" text :to="{ name: 'NuevoPedido' }">Nuevo Pedido</v-btn>
+              <v-btn color="primary" depressed min-height="100%" block class="opcion" text :to="{ name: 'NuevoPedido' }">Nuevo Pedido</v-btn>
             </v-card>
           </v-col>
           <v-col cols="4">
@@ -15,8 +15,8 @@
           </v-col>
           <v-col cols="4">
             <v-card class="tarjeta">
-              <v-btn min-height="100%" block text :to="{ name: 'AgregarMaterial' }"
-                >Agregar Material</v-btn
+              <v-btn min-height="100%" block text :to="{ name: 'MantenimientoMaterial' }"
+                >Materiales</v-btn
               >
             </v-card>
           </v-col>
