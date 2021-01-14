@@ -208,16 +208,17 @@
 <script>
 import SelectorTalla from "../components/SelectorTalla.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapMutations } = createNamespacedHelpers("pedido");
+const {  mapMutations } = createNamespacedHelpers("pedido");
 
 export default {
-  props: ["detalle"],
+  props: ["detalle","estilos","materiales","tallas","forros","suelas","hormas"],
   components: {
     SelectorTalla,
   },
   data: () => ({}),
   methods: {
     ...mapMutations(["agregarDetalleDefault"]),
+
   },
 
   watch: {
@@ -243,16 +244,10 @@ export default {
     },
   },
   computed: {
-    ...mapGetters([
-      "estilos",
-      "materiales",
-      "forros",
-      "suelas",
-      "hormas",
-      "tallas",
-    ]),
   },
 
-  created() {},
+  created() {
+
+  },
 };
 </script>

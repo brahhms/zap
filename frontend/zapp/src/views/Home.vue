@@ -10,7 +10,7 @@
           </v-col>
           <v-col cols="4">
             <v-card class="tarjeta">
-              <v-btn min-height="100%" block text :to="{ name: 'AgregarZapato' }">Agregar Zapato</v-btn>
+              <v-btn min-height="100%" block text :to="{ name: 'MantenimientoEstilo' }">Estilos</v-btn>
             </v-card>
           </v-col>
           <v-col cols="4">

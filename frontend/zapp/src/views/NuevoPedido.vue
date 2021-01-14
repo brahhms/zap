@@ -58,7 +58,15 @@
                 hide-default-footer
               >
                 <template v-slot:item="{ item }">
-                  <detalle-pedido :detalle="item"></detalle-pedido>
+                  <detalle-pedido
+                    :detalle="item"
+                    :estilos="estilos"
+                    :materiales="materiales"
+                    :tallas="tallas"
+                    :forros="forros"
+                    :suelas="suelas"
+                    :hormas="hormas"
+                  ></detalle-pedido>
                 </template>
               </v-data-table>
             </div>
@@ -92,9 +100,33 @@
 import DetallePedido from "../components/DetallePedido.vue";
 import DetalleCliente from "../components/DetalleCliente.vue";
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapMutations, mapState } = createNamespacedHelpers(
+const { mapGetters, mapState, mapMutations } = createNamespacedHelpers(
   "pedido"
 );
+const {
+  mapActions: mapActionsEstilo,
+  mapGetters: mapGettersEstilo,
+} = createNamespacedHelpers("estilo");
+const {
+  mapActions: mapActionsMaterial,
+  mapGetters: mapGettersMaterial,
+} = createNamespacedHelpers("material");
+const {
+  mapActions: mapActionsTalla,
+  mapGetters: mapGettersTalla,
+} = createNamespacedHelpers("talla");
+const {
+  mapActions: mapActionsForro,
+  mapGetters: mapGettersForro,
+} = createNamespacedHelpers("forro");
+const {
+  mapActions: mapActionsSuela,
+  mapGetters: mapGettersSuela,
+} = createNamespacedHelpers("suela");
+const {
+  mapActions: mapActionsHorma,
+  mapGetters: mapGettersHorma,
+} = createNamespacedHelpers("horma");
 
 export default {
   components: {
@@ -151,17 +183,73 @@ export default {
           width: 2,
         },
       ],
+      detalleDefault: {
+        estilo: null,
+        detalleMaterial: {
+          material: null,
+          color: null,
+        },
+        detalleTallas: null,
+        horma: null,
+        detalleForro: {
+          forro: null,
+          color: null,
+        },
+        detalleSuela: {
+          suela: null,
+          color: null,
+        },
+        subtotal: 0,
+      },
     };
   },
   methods: {
-    ...mapMutations(["agregarDetalleDefault"]),
+    ...mapActionsEstilo(["getEstilos"]),
+    ...mapActionsMaterial(["getMateriales"]),
+    ...mapActionsTalla(["getTallas"]),
+    ...mapActionsForro(["getForros"]),
+    ...mapActionsSuela(["getSuelas"]),
+    ...mapActionsHorma(["getHormas"]),
+    ...mapMutations(["setDetalle"]),
+    async cargarDatos() {
+      await this.getEstilos();
+      await this.getMateriales();
+      await this.getTallas();
+      await this.getForros();
+      await this.getSuelas();
+      await this.getHormas();
+      this.agregarDetalleDefault();
+    },
+
+    agregarDetalleDefault() {
+      this.detalleDefault.detalleTallas = this.tallas.map((t) => {
+        return {
+          talla: t,
+          cantidad: 0,
+        };
+      });
+      this.detalleDefault.estilo = this.estilos[0];
+      this.detalleDefault.detalleMaterial.material = this.materiales[0];
+      this.detalleDefault.detalleForro.forro = this.forros[0];
+      this.detalleDefault.detalleSuela.suela = this.suelas[0];
+      this.detalleDefault.horma = this.hormas[0];
+
+      this.setDetalle([this.detalleDefault]);
+      console.log(this.pedido.detalle);
+    },
   },
   computed: {
-    ...mapGetters(["clienteSeleccionado"]),
     ...mapState(["pedido"]),
+    ...mapGetters(["clienteSeleccionado"]),
+    ...mapGettersEstilo(["estilos"]),
+    ...mapGettersMaterial(["materiales"]),
+    ...mapGettersTalla(["tallas"]),
+    ...mapGettersForro(["forros"]),
+    ...mapGettersSuela(["suelas"]),
+    ...mapGettersHorma(["hormas"]),
   },
   created() {
-    this.agregarDetalleDefault();
+    this.cargarDatos();
   },
 };
 </script>

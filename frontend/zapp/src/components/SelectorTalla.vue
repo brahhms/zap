@@ -20,7 +20,7 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters } = createNamespacedHelpers("pedido");
+const { mapGetters } = createNamespacedHelpers("talla");
 
 export default {
   props: ["detalleTallas"],

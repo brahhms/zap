@@ -5,7 +5,7 @@ import NuevoPedido from '../views/NuevoPedido.vue'
 import AgregarForro from '../views/AgregarForro.vue'
 import AgregarMaterial from '../views/AgregarMaterial.vue'
 import AgregarSuela from '../views/AgregarSuela.vue'
-import AgregarZapato from '../views/AgregarZapato.vue'
+import MantenimientoEstilo from '../views/MantenimientoEstilo.vue'
 import VistaPrevia from '../components/VistaPrevia.vue'
 
 Vue.use(VueRouter)
@@ -37,9 +37,9 @@ const routes = [
     component: AgregarSuela
   },
   {
-    path: '/agregarZapato',
-    name: 'AgregarZapato',
-    component: AgregarZapato
+    path: '/mantenimientoEstilo',
+    name: 'MantenimientoEstilo',
+    component: MantenimientoEstilo
   },
   {
     path: '/vistaPrevia',
