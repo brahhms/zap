@@ -94,12 +94,28 @@
         <v-simple-checkbox v-model="item.tacon" disabled></v-simple-checkbox>
       </template>
       <template v-slot:item.img="{ item }">
-        <span v-if="item._attachments">
-          {{ Object.keys(item._attachments)[0] }}</span
-        >
+        <v-chip v-if="item._attachments"> imagen</v-chip>
         <span v-else>sin imagen</span>
       </template>
     </v-data-table>
+
+    <v-container fluid>
+      <v-row dense>
+        <v-col v-for="card in cards" :key="card.title" :cols="card.flex">
+          <v-card>
+            <v-img
+            :key="card.rev"
+              :src="card.src"
+              class="white--text align-end"
+              gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
+              height="200px"
+            >
+              <v-card-title v-text="card.title"></v-card-title>
+            </v-img>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
@@ -146,12 +162,15 @@ export default {
       codigo: "",
       descripcion: "",
       tacon: false,
+      _attachments: null,
     },
     defaultItem: {
       codigo: "",
       descripcion: "",
       tacon: false,
+      _attachments: null,
     },
+    cards: []
   }),
 
   computed: {
@@ -171,13 +190,23 @@ export default {
   },
 
   created() {
-    this.initialize();
+    this.cargarDatos();
   },
 
   methods: {
-    ...mapActions(["getEstilos", "updateEstilo", "saveEstilo", "deleteEstilo"]),
+    ...mapActions([
+      "getEstilos",
+      "updateEstilo",
+      "saveEstilo",
+      "deleteEstilo",
+      "saveAttachment",
+    ]),
+
+    async cargarDatos() {
+      await this.getEstilos();
+      this.initialize();
+    },
     initialize() {
-      this.getEstilos();
       this.items = this.estilos.map((estilo) => {
         return {
           _id: estilo._id,
@@ -186,6 +215,14 @@ export default {
           descripcion: estilo.descripcion,
           tacon: estilo.tacon,
           _attachments: estilo._attachments,
+        };
+      });
+      this.cards = this.items.map((item) => {
+        return {
+          title: item.codigo,
+          src: `http://localhost:5984/zapp-estilos/${item._id}/img`,
+          flex: 3,
+          rev:item._rev
         };
       });
     },
@@ -224,16 +261,17 @@ export default {
       });
     },
 
-    save() {
+    async save() {
       if (this.editedIndex > -1) {
         //editar
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateEstilo(this.editedItem);
+        await this.updateEstilo(this.editedItem);
+        Object.assign(this.items[this.editedIndex], this.editedItem); 
+      
+
       } else {
         //guardar
-        this.items.push(this.editedItem);
-        console.log(this.editedItem);
-        this.saveEstilo(this.editedItem);
+        await this.saveEstilo(this.editedItem);
+        this.items.push(this.editedItem);        
       }
       this.close();
     },

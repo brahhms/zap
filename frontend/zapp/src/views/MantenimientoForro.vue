@@ -1,15 +1,15 @@
 <template>
-  <div class="material">
+  <div class="forro">
     <v-data-table :headers="headers" :items="items" class="elevation-1">
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>MATERIALES</v-toolbar-title>
+          <v-toolbar-title>FORROS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Material
+                Nuevo Forro
               </v-btn>
             </template>
             <v-card>
@@ -62,7 +62,7 @@
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Desea eliminar este material?</v-card-title
+                >Desea eliminar este forro?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -100,7 +100,7 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("material");
+const { mapGetters, mapActions } = createNamespacedHelpers("forro");
 export default {
   data: () => ({
     dialog: false,
@@ -155,7 +155,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["materiales"]),
+    ...mapGetters(["forros"]),
   },
 
   watch: {
@@ -172,24 +172,19 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      "getMateriales",
-      "updateMaterial",
-      "saveMaterial",
-      "deleteMaterial",
-    ]),
+    ...mapActions(["getForros", "updateForro", "saveForro", "deleteForro"]),
     async cargarDatos() {
-      await this.getMateriales();
+      await this.getForros();
       this.initialize();
     },
     initialize() {
-      this.items = this.materiales.map((material) => {
+      this.items = this.forros.map((forro) => {
         return {
-          _id: material._id,
-          _rev: material._rev,
-          nombre: material.nombre,
-          defaultColor: material.defaultColor,
-          colores: material.colores,
+          _id: forro._id,
+          _rev: forro._rev,
+          nombre: forro.nombre,
+          defaultColor: forro.defaultColor,
+          colores: forro.colores,
         };
       });
     },
@@ -207,7 +202,7 @@ export default {
     },
 
     deleteItemConfirm() {
-      this.deleteMaterial(this.editedItem);
+      this.deleteForro(this.editedItem);
       this.items.splice(this.editedIndex, 1);
       this.closeDelete();
     },
@@ -232,12 +227,12 @@ export default {
       if (this.editedIndex > -1) {
         //editar
         Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateMaterial(this.editedItem);
+        this.updateForro(this.editedItem);
       } else {
         //guardar
         this.items.push(this.editedItem);
         console.log(this.editedItem);
-        this.saveMaterial(this.editedItem);
+        this.saveForro(this.editedItem);
       }
       this.close();
     },

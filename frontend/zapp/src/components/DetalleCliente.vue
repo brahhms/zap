@@ -2,32 +2,23 @@
   <v-card class="mx-auto" max-width="500" flat>
     <v-card-title class="title font-weight-regular justify-space-between">
       <span>{{ currentTitle }}</span>
-      <v-avatar
-        color="primary lighten-2"
-        class="subheading white--text"
-        size="24"
-        v-text="step"
-      ></v-avatar>
+    
     </v-card-title>
 
     <v-window v-model="step">
       <v-window-item :value="1">
         <v-card-text>
           <v-autocomplete
-            auto-select-first
             clearable
             label="Cliente"
             :items="clientes"
             v-model="seleccionado"
             @change="setCliente(seleccionado)"
+            item-text="nombre"
+            required
+            return-object
           >
             <v-icon slot="prepend" color="primary"> mdi-account </v-icon>
-            <template v-slot:item="data">
-              {{ data.item.nombre }}
-            </template>
-            <template v-slot:selection="data">
-              {{ data.item.nombre }}
-            </template>
           </v-autocomplete>
         </v-card-text>
         <v-card-actions>
@@ -47,35 +38,36 @@
 
       <v-window-item :value="2">
         <v-card-text>
-          <v-text-field
-            label="Nombre"
-            v-model="cliente.nombre"
-            type="text"
-          ></v-text-field>
-          <v-text-field
-            label="Telefono"
-            v-model="cliente.telefono"
-            type="text"
-          ></v-text-field>
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-text-field
+              :rules="nombreRules"
+              label="Nombre"
+              v-model="cliente.nombre"
+              type="text"
+              required
+            ></v-text-field>
+            <v-text-field
+              :rules="telefonoRules"
+              label="Telefono"
+              v-model="cliente.telefono"
+              type="text"
+            ></v-text-field>
+            <v-text-field
+              :rules="descripcionRules"
+              label="Descripcion"
+              v-model="cliente.descripcion"
+              type="text"
+            ></v-text-field>
+          </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-btn
-            color="primary"
-            @click="
-              step--;
-              limpiarCliente();
-            "
-          >
-            Regresar
-          </v-btn>
+          <v-btn color="primary" @click="cancelar()"> Regresar </v-btn>
           <v-spacer></v-spacer>
           <v-btn
             color="primary"
+            :disabled="!valid"
             depressed
-            @click="
-              saveCliente(cliente);
-              setCliente(cliente);
-            "
+            @click="guardarCliente(cliente)"
           >
             Crear
           </v-btn>
@@ -86,18 +78,30 @@
 </template>
 
 <script>
-import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapMutations } = createNamespacedHelpers("cliente");
-const { mapMutations: pedidoMapMutations } = createNamespacedHelpers("pedido");
+import { createNamespacedHelpers, mapState } from "vuex";
+const { mapActions } = createNamespacedHelpers("cliente");
+const {
+  mapMutations: pedidoMapMutations,
+  mapGetters,
+} = createNamespacedHelpers("pedido");
 
 export default {
   data: () => ({
+    valid: false,
+    nombreRules: [
+      (v) => !!v || "Nombre es requerido",
+      (v) =>
+        (v && v.length <= 12) || "Nombre debe contener menos de 12 caracteres",
+    ],
+    telefonoRules: [v => ((v == null || v=='') || (!isNaN(v) && v>20000000 && v<80000000 ))  || 'Debe introducir un numero valido'],
+    descripcionRules: [],
     step: 1,
-    cliente: { nombre: null, telefono: null, direccion: null },
+    cliente: { nombre: "", telefono: "", direccion: "" },
     seleccionado: null,
   }),
 
   computed: {
+    ...mapState(["snackbar"]),
     ...mapGetters(["clientes"]),
     currentTitle() {
       switch (this.step) {
@@ -111,12 +115,31 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["saveCliente"]),
+    ...mapActions(["saveCliente"]),
     ...pedidoMapMutations(["setCliente"]),
-    limpiarCliente() {
-      this.cliente = { nombre: "", telefono: "", direccion: "" };
+    validate() {
+      this.valid = this.$refs.form.validate();
+      console.log("form valid? " + this.valid);
+    },
+    cancelar() {
+      this.step--;
+      this.$refs.form.reset()
+      //this.cliente = { nombre: "", telefono: "", direccion: "" };
+    },
+
+    async guardarCliente(cliente) {
+      this.validate();
+      if (!this.valid) return;
+      const res = await this.saveCliente(cliente);
+
+      if (res.data.ok) {
+        this.setCliente(cliente);
+        this.snackbar.msj = "Cliente guardado!";
+        this.snackbar.show = true;
+      }
     },
   },
-  created: function () {},
+  created() {},
+  mounted() {},
 };
 </script>

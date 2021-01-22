@@ -18,7 +18,13 @@ axios.defaults.baseURL = "http://localhost:5984"
 export default new Vuex.Store({
   state: {
     pedidos: null,
-    showBar: true
+    showBar: true,
+    snackbar: {
+      show:false,
+      timeout: 2000,
+      snackbar: false,
+      msj: "",
+    }
   },
   mutations: {
     ocultarBarra(state) {

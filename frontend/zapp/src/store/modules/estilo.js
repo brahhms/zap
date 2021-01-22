@@ -10,6 +10,15 @@ async function getAll() {
   return response;
 }
 
+async function createAttachment(att, id, rev) {
+  await axios.put(`${url}${id}/img?rev=${rev}`, att, {
+    "auth": credentials.authentication.auth,
+    "headers": {
+      "Content-Type": att.type
+    }
+  }, credentials.authentication);
+}
+
 
 export default {
   namespaced: true,
@@ -36,13 +45,19 @@ export default {
     async updateEstilo({
       commit
     }, estilo) {
-      await axios.put(`${url}${estilo._id}/`, estilo, {
+      const res = await axios.put(`${url}${estilo._id}/`, estilo, {
         params: {
           "rev": estilo._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
+
+      let att = estilo._attachments;
+      if (res.data.ok && att != null && att != undefined) {
+        await createAttachment(att, res.data.id, res.data.rev);
+      }
+
       const response = await getAll();
       commit('setEstilos', response.data.docs);
     },
@@ -50,10 +65,15 @@ export default {
     async saveEstilo({
       commit
     }, estilo) {
-      await axios.post(`${url}`, estilo, {
+      const res = await axios.post(`${url}`, estilo, {
         "auth": credentials.authentication.auth,
-        "headers": credentials.authentication.headers,
+        "headers": credentials.authentication.headers
       }, credentials.authentication);
+
+      let att = estilo._attachments;
+      if (res.data.ok && att != null && att != undefined) {
+        await createAttachment(att, res.data.id, res.data.rev);
+      }
 
       const response = await getAll();
       commit('setEstilos', response.data.docs);
@@ -72,7 +92,8 @@ export default {
 
       const response = await getAll();
       commit('setEstilos', response.data.docs);
-    }
+    },
+
   },
   getters: {
     estilos: state => state.estilos

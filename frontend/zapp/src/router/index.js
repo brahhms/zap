@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import Pedidos from '../views/Pedidos.vue'
 import NuevoPedido from '../views/NuevoPedido.vue'
-import AgregarForro from '../views/AgregarForro.vue'
+import MantenimientoForro from '../views/MantenimientoForro.vue'
 import MantenimientoMaterial from '../views/MantenimientoMaterial.vue'
-import AgregarSuela from '../views/AgregarSuela.vue'
+import MantenimientoSuela from '../views/MantenimientoSuela.vue'
 import MantenimientoEstilo from '../views/MantenimientoEstilo.vue'
+import MantenimientoCliente from '../views/MantenimientoCliente.vue'
 import VistaPrevia from '../components/VistaPrevia.vue'
 
 Vue.use(VueRouter)
@@ -17,14 +19,19 @@ const routes = [
     component: Home
   },
   {
+    path: '/pedidos',
+    name: 'Pedidos',
+    component: Pedidos
+  },
+  {
     path: '/nuevoPedido',
     name: 'NuevoPedido',
     component: NuevoPedido
   },
   {
-    path: '/agregarForro',
-    name: 'AgregarForro',
-    component: AgregarForro
+    path: '/mantenimientoForro',
+    name: 'MantenimientoForro',
+    component: MantenimientoForro
   },
   {
     path: '/mantenimientoMaterial',
@@ -32,14 +39,19 @@ const routes = [
     component: MantenimientoMaterial
   },
   {
-    path: '/agregarSuela',
-    name: 'AgregarSuela',
-    component: AgregarSuela
+    path: '/mantenimientoSuela',
+    name: 'MantenimientoSuela',
+    component: MantenimientoSuela
   },
   {
     path: '/mantenimientoEstilo',
     name: 'MantenimientoEstilo',
     component: MantenimientoEstilo
+  },
+  {
+    path: '/mantenimientoCliente',
+    name: 'MantenimientoCliente',
+    component: MantenimientoCliente
   },
   {
     path: '/vistaPrevia',

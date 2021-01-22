@@ -1,8 +1,8 @@
 <template>
   <v-container>
-    <v-div v-for="pedido in pedidos" :key="pedido.cliente">
+    <div v-for="pedido in pedidos" :key="pedido._id">
       <v-row
-        ><v-col>{{ pedido.cliente }}</v-col
+        ><v-col>{{ pedido.cliente.nombre }}</v-col
         ><v-spacer></v-spacer
       ></v-row>
       <v-row>
@@ -10,28 +10,48 @@
           <v-simple-table dense>
             <template v-slot:default>
               <tbody>
-                <tr class="fila" v-for="detalle in pedido.detalle" :key="detalle.estilo">
-                  <td>{{ detalle.estilo }}</td>
-                  <td>{{ detalle.material.nombre }}</td>
-                  <td>{{ detalle.material.color }}</td>
+                <tr
+                  class="fila"
+                  v-for="detalle in pedido.detalle"
+                  :key="detalle.estilo._id"
+                >
+                  <td>{{ detalle.estilo.codigo }}</td>
+                  <td>{{ detalle.detalleMaterial.material.nombre }}</td>
+                  <td>{{ detalle.detalleMaterial.color }}</td>
                   <td
                     v-for="detalleTallas in detalle.detalleTallas"
-                    :key="detalleTallas.nombre"
+                    :key="detalleTallas.talla._id"
                   >
-                    {{ detalleTallas.cantidad }}/{{ detalleTallas.nombre }}
+                    {{ detalleTallas.cantidad }}/{{
+                      detalleTallas.talla.nombre
+                    }}
                   </td>
-                  <td>{{ detalle.horma }}</td>
-                  <td>{{ detalle.forro.nombre }}</td>
-                  <td>{{ detalle.forro.color }}</td>
-                  <td>{{ detalle.suela.nombre }}</td>
-                  <td>{{ detalle.suela.color }}</td>
+                  <td>{{ detalle.horma.nombre }}</td>
+                  <td>{{ detalle.detalleForro.forro.nombre }}</td>
+                  <td>{{ detalle.detalleForro.color }}</td>
+                  <td>{{ detalle.detalleSuela.suela.nombre }}</td>
+                  <td>{{ detalle.detalleSuela.color }}</td>
+                  <td>
+                    <v-chip>{{ detalle.subtotal }}</v-chip>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="8"></td>
+                  <td>total:</td>
+                  <td>{{ total(pedido.detalle) }}</td>
                 </tr>
               </tbody>
             </template>
           </v-simple-table>
         </v-col>
       </v-row>
-    </v-div>
+      <br />
+    </div>
+    <v-fab-transition>
+      <v-btn color="primary" depressed dark fixed bottom right fab>
+        <v-icon>mdi-printer</v-icon>
+      </v-btn>
+    </v-fab-transition>
   </v-container>
 </template>
 
@@ -158,7 +178,7 @@ export default {
   },
 
   computed: {},
-  created: function () {
+  created() {
     this.ocultarBarra();
   },
 };

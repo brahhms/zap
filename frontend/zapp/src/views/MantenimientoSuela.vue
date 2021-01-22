@@ -1,15 +1,15 @@
 <template>
-  <div class="material">
+  <div class="suela">
     <v-data-table :headers="headers" :items="items" class="elevation-1">
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>MATERIALES</v-toolbar-title>
+          <v-toolbar-title>SUELAS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Material
+                Nuevo Suela
               </v-btn>
             </template>
             <v-card>
@@ -62,7 +62,7 @@
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Desea eliminar este material?</v-card-title
+                >Desea eliminar este suela?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -100,7 +100,7 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("material");
+const { mapGetters, mapActions } = createNamespacedHelpers("suela");
 export default {
   data: () => ({
     dialog: false,
@@ -155,7 +155,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["materiales"]),
+    ...mapGetters(["suelas"]),
   },
 
   watch: {
@@ -172,24 +172,19 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      "getMateriales",
-      "updateMaterial",
-      "saveMaterial",
-      "deleteMaterial",
-    ]),
+    ...mapActions(["getSuelas", "updateSuela", "saveSuela", "deleteSuela"]),
     async cargarDatos() {
-      await this.getMateriales();
+      await this.getSuelas();
       this.initialize();
     },
     initialize() {
-      this.items = this.materiales.map((material) => {
+      this.items = this.suelas.map((suela) => {
         return {
-          _id: material._id,
-          _rev: material._rev,
-          nombre: material.nombre,
-          defaultColor: material.defaultColor,
-          colores: material.colores,
+          _id: suela._id,
+          _rev: suela._rev,
+          nombre: suela.nombre,
+          defaultColor: suela.defaultColor,
+          colores: suela.colores,
         };
       });
     },
@@ -207,7 +202,7 @@ export default {
     },
 
     deleteItemConfirm() {
-      this.deleteMaterial(this.editedItem);
+      this.deleteSuela(this.editedItem);
       this.items.splice(this.editedIndex, 1);
       this.closeDelete();
     },
@@ -232,12 +227,12 @@ export default {
       if (this.editedIndex > -1) {
         //editar
         Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateMaterial(this.editedItem);
+        this.updateSuela(this.editedItem);
       } else {
         //guardar
         this.items.push(this.editedItem);
         console.log(this.editedItem);
-        this.saveMaterial(this.editedItem);
+        this.saveSuela(this.editedItem);
       }
       this.close();
     },

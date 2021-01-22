@@ -8,19 +8,16 @@
           <v-container class="mt-3">
             <v-autocomplete
               v-model="detalle.estilo"
+              required
               label="codigo"
               :items="estilos"
               clearable
               dense
               filled
               rounded
+              item-text="codigo"
+              return-object
             >
-              <template v-slot:item="{ item }">
-                {{ item.codigo }}
-              </template>
-              <template v-slot:selection="{ item }">
-                {{ item.codigo }}
-              </template>
             </v-autocomplete>
           </v-container>
         </template>
@@ -46,6 +43,8 @@
               dense
               filled
               rounded
+              item-text="nombre"
+              return-object
             >
               <template v-slot:item="{ item }">
                 {{ item.nombre }}
@@ -63,6 +62,7 @@
               dense
               filled
               rounded
+              item-text="nombre"
             ></v-autocomplete>
           </v-container>
         </template>
@@ -102,6 +102,8 @@
               dense
               filled
               rounded
+              item-text="nombre"
+              return-object
             >
               <template v-slot:item="{ item }">
                 {{ item.nombre }}
@@ -134,6 +136,8 @@
               dense
               filled
               rounded
+              item-text="nombre"
+              return-object
             >
               <template v-slot:item="{ item }">
                 {{ item.nombre }}
@@ -151,6 +155,7 @@
               dense
               filled
               rounded
+              item-text="nombre"
             ></v-autocomplete>
           </v-container>
         </template>
@@ -176,6 +181,8 @@
               dense
               filled
               rounded
+              item-text="nombre"
+              return-object
             >
               <template v-slot:item="{ item }">
                 {{ item.nombre }}
@@ -193,6 +200,7 @@
               dense
               filled
               rounded
+              item-text="nombre"
             ></v-autocomplete>
           </v-container>
         </template>
@@ -207,19 +215,26 @@
 
 <script>
 import SelectorTalla from "../components/SelectorTalla.vue";
-import { createNamespacedHelpers } from "vuex";
-const {  mapMutations } = createNamespacedHelpers("pedido");
 
 export default {
-  props: ["detalle","estilos","materiales","tallas","forros","suelas","hormas"],
+  props: [
+    "detalle",
+    "estilos",
+    "materiales",
+    "tallas",
+    "forros",
+    "suelas",
+    "hormas",
+  ],
   components: {
     SelectorTalla,
   },
-  data: () => ({}),
-  methods: {
-    ...mapMutations(["agregarDetalleDefault"]),
-
-  },
+  data: () => ({
+    selected: {
+      estilo: null,
+    },
+  }),
+  methods: {},
 
   watch: {
     "detalle.detalleTallas": {
@@ -243,11 +258,10 @@ export default {
       if (newVal != null) this.detalle.detalleSuela.color = newVal.defaultColor;
     },
   },
-  computed: {
-  },
+  computed: {},
 
   created() {
-
+    this.detalle;
   },
 };
 </script>

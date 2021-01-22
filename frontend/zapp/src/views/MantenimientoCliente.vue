@@ -1,15 +1,15 @@
 <template>
-  <div class="material">
+  <div class="cliente">
     <v-data-table :headers="headers" :items="items" class="elevation-1">
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>MATERIALES</v-toolbar-title>
+          <v-toolbar-title>CLIENTES</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Material
+                Nuevo Cliente
               </v-btn>
             </template>
             <v-card>
@@ -27,22 +27,17 @@
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-combobox
-                        v-model="editedItem.colores"
-                        :items="colores"
-                        label="Colores"
-                        multiple
-                        chips
-                      ></v-combobox>
+                      <v-text-field
+                        v-model="editedItem.telefono"
+                        label="Telefono"
+                      ></v-text-field>
                     </v-col>
 
                     <v-col cols="12">
-                      <v-select
-                        v-if="editedItem.colores"
-                        :items="editedItem.colores"
-                        v-model="editedItem.defaultColor"
-                        label="Color default"
-                      ></v-select>
+                      <v-text-field
+                        v-model="editedItem.direccion"
+                        label="Direccion"
+                      ></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -62,7 +57,7 @@
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Desea eliminar este material?</v-card-title
+                >Desea eliminar este cliente?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -85,13 +80,7 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
-      <template v-slot:item.colores="{ item }">
-        <div v-if="item.colores">
-          <v-chip v-for="color in item.colores" :key="color">{{
-            color
-          }}</v-chip>
-        </div>
-      </template>
+
     </v-data-table>
   </div>
 </template>
@@ -100,7 +89,7 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("material");
+const { mapGetters, mapActions } = createNamespacedHelpers("cliente");
 export default {
   data: () => ({
     dialog: false,
@@ -113,16 +102,16 @@ export default {
         value: "nombre",
       },
       {
-        text: "Default color",
+        text: "Telefono",
         align: "start",
         sortable: false,
-        value: "defaultColor",
+        value: "telefono",
       },
       {
-        text: "Colores",
+        text: "Direccion",
         align: "start",
         sortable: false,
-        value: "colores",
+        value: "direccion",
       },
       { text: "Acciones", value: "actions", sortable: false },
     ],
@@ -130,32 +119,22 @@ export default {
     editedIndex: -1,
     editedItem: {
       nombre: "",
-      defaultColor: "",
-      colores: [],
+      telefono: "",
+      direccion: [],
     },
     defaultItem: {
       nombre: "",
-      defaultColor: "",
-      colores: [],
+      telefono: "",
+      direccion: "",
     },
-    colores: [
-      "azul",
-      "verde",
-      "rojo",
-      "cafe",
-      "negro",
-      "blanco",
-      "morado",
-      "celeste",
-      "gris",
-    ],
+
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["materiales"]),
+    ...mapGetters(["clientes"]),
   },
 
   watch: {
@@ -172,24 +151,19 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      "getMateriales",
-      "updateMaterial",
-      "saveMaterial",
-      "deleteMaterial",
-    ]),
+    ...mapActions(["getClientes", "updateCliente", "saveCliente", "deleteCliente"]),
     async cargarDatos() {
-      await this.getMateriales();
+      await this.getClientes();
       this.initialize();
     },
     initialize() {
-      this.items = this.materiales.map((material) => {
+      this.items = this.clientes.map((cliente) => {
         return {
-          _id: material._id,
-          _rev: material._rev,
-          nombre: material.nombre,
-          defaultColor: material.defaultColor,
-          colores: material.colores,
+          _id: cliente._id,
+          _rev: cliente._rev,
+          nombre: cliente.nombre,
+          telefono: cliente.telefono,
+          direccion: cliente.direccion,
         };
       });
     },
@@ -207,7 +181,7 @@ export default {
     },
 
     deleteItemConfirm() {
-      this.deleteMaterial(this.editedItem);
+      this.deleteCliente(this.editedItem);
       this.items.splice(this.editedIndex, 1);
       this.closeDelete();
     },
@@ -232,12 +206,12 @@ export default {
       if (this.editedIndex > -1) {
         //editar
         Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateMaterial(this.editedItem);
+        this.updateCliente(this.editedItem);
       } else {
         //guardar
         this.items.push(this.editedItem);
-        console.log(this.editedItem);
-        this.saveMaterial(this.editedItem);
+        
+        this.saveCliente(this.editedItem);
       }
       this.close();
     },

@@ -1,19 +1,23 @@
 <template>
-  <v-data-table dense :headers="headers" :items="[1]" hide-default-footer>
-    <template v-slot:item>
-      <tr>
-        <td v-for="t in detalleTallas" :key="t.talla._id">
-          <v-text-field
-            v-model.lazy.number="t.cantidad"
-            flat
-            hide-details
-            dense
-            :value="t.cantidad"
-          ></v-text-field>
-        </td>
-      </tr>
-    </template>
-  </v-data-table>
+  <v-container>
+    <v-data-table :headers="headers" :items="[1]" hide-default-footer>
+      <template v-slot:item>
+        <tr>
+          <td v-for="t in detalleTallas" :key="t.talla._id">
+            <v-text-field
+              v-model.lazy.number="t.cantidad"
+              flat
+              hide-details
+              dense
+              :value="t.cantidad"
+              type="number"
+              
+            ></v-text-field>
+          </td>
+        </tr>
+      </template>
+    </v-data-table>
+  </v-container>
 </template>
 
 
@@ -27,8 +31,7 @@ export default {
   data() {
     return {};
   },
-  methods: {
-  },
+  methods: {},
 
   computed: {
     ...mapGetters(["tallas"]),

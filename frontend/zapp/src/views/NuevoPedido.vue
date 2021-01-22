@@ -8,7 +8,7 @@
 
         <v-divider></v-divider>
 
-        <v-stepper-step :complete="e1 > 2" step="2" editable>
+        <v-stepper-step :complete="e1 > 2" step="2" >
           Agregar Detalle de Pedido
         </v-stepper-step>
 
@@ -19,8 +19,10 @@
 
       <v-stepper-items>
         <v-stepper-content step="1">
-          <v-card class="mb-12 paso-contenido" flat>
-            <detalle-cliente></detalle-cliente>
+          <v-card class="mb-12 paso-contenido" flat :loading="loading1">
+            <detalle-cliente v-if="clientes != null"></detalle-cliente>
+
+           
           </v-card>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -54,7 +56,7 @@
 
               <v-data-table
                 :headers="headers"
-                :items="pedido.detalle"
+                :items="detalles"
                 hide-default-footer
               >
                 <template v-slot:item="{ item }">
@@ -76,57 +78,63 @@
               Regresar
             </v-btn>
             <v-spacer></v-spacer>
-            <v-btn color="primary" depressed x-large @click="e1++">
-              Continuar
+            <v-btn
+              color="primary"
+              depressed
+              x-large
+              @click="
+                e1++;
+                savePedido();
+              "
+            >
+              Guardar
             </v-btn>
           </v-card-actions>
         </v-stepper-content>
 
         <v-stepper-content step="3">
-          <v-card class="mb-12 paso-contenido" color="grey lighten-1">
-            <!--<iframe id="frame" src="/#/vistaPrevia" frameborder="0"></iframe>-->
+          <v-card
+            class="mb-12 paso-contenido text-center"
+            color="grey lighten-1"
+          >
+            <iframe id="frame" src="/#/pedidos" frameborder="0"></iframe>
           </v-card>
           <v-card-actions>
-            <v-btn color="primary" @click="e1 = 3"> Continue </v-btn>
-
-            <v-btn text> Cancel </v-btn>
+            <v-btn color="primary" depressed x-large @click="e1 = 1">
+              Agregar otro pedido
+            </v-btn>
+            <v-spacer></v-spacer>
           </v-card-actions>
         </v-stepper-content>
       </v-stepper-items>
     </v-stepper>
+
+    <v-snackbar
+      v-model="snackbar.show"
+      :timeout="snackbar.timeout"
+    >
+      {{ snackbar.msj }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="blue"
+          text
+          v-bind="attrs"
+          @click="snackbar.show = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 <script>
 import DetallePedido from "../components/DetallePedido.vue";
 import DetalleCliente from "../components/DetalleCliente.vue";
-import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapState, mapMutations } = createNamespacedHelpers(
+import { createNamespacedHelpers ,mapState} from "vuex";
+const { mapGetters, mapMutations, mapActions } = createNamespacedHelpers(
   "pedido"
 );
-const {
-  mapActions: mapActionsEstilo,
-  mapGetters: mapGettersEstilo,
-} = createNamespacedHelpers("estilo");
-const {
-  mapActions: mapActionsMaterial,
-  mapGetters: mapGettersMaterial,
-} = createNamespacedHelpers("material");
-const {
-  mapActions: mapActionsTalla,
-  mapGetters: mapGettersTalla,
-} = createNamespacedHelpers("talla");
-const {
-  mapActions: mapActionsForro,
-  mapGetters: mapGettersForro,
-} = createNamespacedHelpers("forro");
-const {
-  mapActions: mapActionsSuela,
-  mapGetters: mapGettersSuela,
-} = createNamespacedHelpers("suela");
-const {
-  mapActions: mapActionsHorma,
-  mapGetters: mapGettersHorma,
-} = createNamespacedHelpers("horma");
 
 export default {
   components: {
@@ -136,6 +144,7 @@ export default {
   data() {
     return {
       e1: 1,
+      loading1:true,
       headers: [
         {
           text: "Estilo",
@@ -183,7 +192,22 @@ export default {
           width: 2,
         },
       ],
-      detalleDefault: {
+    };
+  },
+  methods: {
+    ...mapActions(["getData", "savePedido"]),
+    ...mapMutations(["pushDetalle", "setDetalle"]),
+    async loadData() {
+      console.log("Vorher");
+      await this.getData();
+      this.loading1=false;
+      console.log("Nachher");
+      this.setDetalle([]);
+      this.agregarDetalleDefault();
+    },
+
+    agregarDetalleDefault() {
+      let detalleDefault = {
         estilo: null,
         detalleMaterial: {
           material: null,
@@ -200,56 +224,38 @@ export default {
           color: null,
         },
         subtotal: 0,
-      },
-    };
-  },
-  methods: {
-    ...mapActionsEstilo(["getEstilos"]),
-    ...mapActionsMaterial(["getMateriales"]),
-    ...mapActionsTalla(["getTallas"]),
-    ...mapActionsForro(["getForros"]),
-    ...mapActionsSuela(["getSuelas"]),
-    ...mapActionsHorma(["getHormas"]),
-    ...mapMutations(["setDetalle"]),
-    async cargarDatos() {
-      await this.getEstilos();
-      await this.getMateriales();
-      await this.getTallas();
-      await this.getForros();
-      await this.getSuelas();
-      await this.getHormas();
-      this.agregarDetalleDefault();
-    },
-
-    agregarDetalleDefault() {
-      this.detalleDefault.detalleTallas = this.tallas.map((t) => {
+      };
+      detalleDefault.detalleTallas = this.tallas.map((t) => {
         return {
           talla: t,
           cantidad: 0,
         };
       });
-      this.detalleDefault.estilo = this.estilos[0];
-      this.detalleDefault.detalleMaterial.material = this.materiales[0];
-      this.detalleDefault.detalleForro.forro = this.forros[0];
-      this.detalleDefault.detalleSuela.suela = this.suelas[0];
-      this.detalleDefault.horma = this.hormas[0];
+      detalleDefault.estilo = this.estilos[0];
+      detalleDefault.detalleMaterial.material = this.materiales[0];
+      detalleDefault.detalleForro.forro = this.forros[0];
+      detalleDefault.detalleSuela.suela = this.suelas[0];
+      detalleDefault.horma = this.hormas[0];
 
-      this.setDetalle([this.detalleDefault]);
-      console.log(this.pedido.detalle);
+      this.pushDetalle(detalleDefault);
     },
   },
   computed: {
-    ...mapState(["pedido"]),
-    ...mapGetters(["clienteSeleccionado"]),
-    ...mapGettersEstilo(["estilos"]),
-    ...mapGettersMaterial(["materiales"]),
-    ...mapGettersTalla(["tallas"]),
-    ...mapGettersForro(["forros"]),
-    ...mapGettersSuela(["suelas"]),
-    ...mapGettersHorma(["hormas"]),
+    ...mapState(["snackbar"]),
+    ...mapGetters([
+      "clienteSeleccionado",
+      "detalles",
+      "estilos",
+      "materiales",
+      "tallas",
+      "forros",
+      "suelas",
+      "hormas",
+      "clientes",
+    ]),
   },
   created() {
-    this.cargarDatos();
+    this.loadData();
   },
 };
 </script>
@@ -260,16 +266,16 @@ export default {
 }
 
 #frame {
-  width: 800px;
-  height: 450px;
+  width: 1200px;
+  height: 530px;
 }
 #frame {
-  -ms-zoom: 0.75;
-  -moz-transform: scale(0.7);
+  -ms-zoom: 0.6;
+  -moz-transform: scale(0.6);
   -moz-transform-origin: 0 0;
-  -o-transform: scale(0.7);
+  -o-transform: scale(0.6);
   -o-transform-origin: 0 0;
-  -webkit-transform: scale(0.7);
+  -webkit-transform: scale(0.6);
   -webkit-transform-origin: 0 0;
 }
 </style>
