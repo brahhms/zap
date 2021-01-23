@@ -85,13 +85,14 @@ export default {
       commit('setData', data);
     },
     async savePedido({commit,state}) {
-      await axios.post(`${url}`, state.pedido, {
+      const res = await axios.post(`${url}`, state.pedido, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
       const response = await getAll();
       commit('setPedidos', response.data.docs);
+      return res;
     },
   },
   getters: {

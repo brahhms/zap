@@ -2,7 +2,7 @@
   <v-container >
     <div class="contenedor">
       <div class="columna">
-      <div class="pedido" v-for="pedido in pedidos" :key="pedido._id">
+      <div class="pedido" v-for="pedido in pedidos" :key="pedido._rev">
         <v-row>
           <v-col style="font-size:14px;font-weight: bold;">
             {{ pedido.cliente.nombre }}
@@ -11,7 +11,7 @@
           </v-row>
         <v-row>
           <v-col>
-            <v-simple-table dense>
+            <v-simple-table>
               <template v-slot:default>
                 <thead>
                   <td colspan="9"></td>
@@ -86,18 +86,18 @@ export default {
       headers: [
         {
           text: "",
-          align: "start",
+          align: "center",
           sortable: false,
           value: "codigo",
         },
-        { text: "", value: "material" },
-        { text: "", value: "colorMaterial" },
-        { text: "", value: "tallas" },
-        { text: "", value: "horma" },
-        { text: "", value: "forro" },
-        { text: "", value: "colorForro" },
-        { text: "", value: "suela" },
-        { text: "", value: "colorSuela" },
+        { text: "",align: "center", value: "material" },
+        { text: "",align: "center", value: "colorMaterial" },
+        { text: "",align: "center", value: "tallas" },
+        { text: "",align: "center", value: "horma" },
+        { text: "",align: "center", value: "forro" },
+        { text: "",align: "center", value: "colorForro" },
+        { text: "",align: "center", value: "suela" },
+        { text: "",align: "center", value: "colorSuela" },
         { text: "subtotal", value: "subtotal" },
       ],
     };
@@ -148,8 +148,8 @@ export default {
 }
 
 td {
-  font-size: 12px !important;
-  padding: 0 !important;
+  font-size: 11px !important;
+  padding: 2px !important;
 }
 
 .contenedor {
@@ -158,7 +158,7 @@ td {
   column-count: 2;
 
 margin: 0 auto;
-  width: 920px;
+  width: 1000px;
 }
 
 .columna{

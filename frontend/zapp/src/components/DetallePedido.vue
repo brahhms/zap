@@ -9,6 +9,7 @@
             <v-autocomplete
               v-model="detalle.estilo"
               required
+              :rules="notNull"
               label="codigo"
               :items="estilos"
               clearable
@@ -16,7 +17,7 @@
               filled
               rounded
               item-text="codigo"
-              return-object
+              return-object 
             >
             </v-autocomplete>
           </v-container>
@@ -45,6 +46,7 @@
               rounded
               item-text="nombre"
               return-object
+              :rules="notNull"
             >
               <template v-slot:item="{ item }">
                 {{ item.nombre }}
@@ -95,6 +97,7 @@
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
+            :rules="notNull"
               v-model="detalle.horma"
               label="horma"
               :items="hormas"
@@ -129,6 +132,7 @@
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
+            :rules="notNull"
               v-model="detalle.detalleForro.forro"
               label="forro"
               :items="forros"
@@ -174,6 +178,7 @@
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
+            :rules="notNull"
               v-model="detalle.detalleSuela.suela"
               label="suela"
               :items="suelas"
@@ -230,6 +235,8 @@ export default {
     SelectorTalla,
   },
   data: () => ({
+    notNull: [
+      (v) => !!v || "Este campo es requerido"    ],
     selected: {
       estilo: null,
     },
@@ -244,6 +251,7 @@ export default {
           subtotal += talla.cantidad;
         });
         this.detalle.subtotal = subtotal;
+        
       },
       deep: true,
     },

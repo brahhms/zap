@@ -8,7 +8,7 @@
 
         <v-divider></v-divider>
 
-        <v-stepper-step :complete="e1 > 2" step="2" >
+        <v-stepper-step :complete="e1 > 2" step="2">
           Agregar Detalle de Pedido
         </v-stepper-step>
 
@@ -21,8 +21,6 @@
         <v-stepper-content step="1">
           <v-card class="mb-12 paso-contenido" flat :loading="loading1">
             <detalle-cliente v-if="clientes != null"></detalle-cliente>
-
-           
           </v-card>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -53,24 +51,25 @@
                   <v-icon>mdi-plus</v-icon>
                 </v-btn>
               </v-app-bar>
-
-              <v-data-table
-                :headers="headers"
-                :items="detalles"
-                hide-default-footer
-              >
-                <template v-slot:item="{ item }">
-                  <detalle-pedido
-                    :detalle="item"
-                    :estilos="estilos"
-                    :materiales="materiales"
-                    :tallas="tallas"
-                    :forros="forros"
-                    :suelas="suelas"
-                    :hormas="hormas"
-                  ></detalle-pedido>
-                </template>
-              </v-data-table>
+              <v-form ref="form" v-model="valid" lazy-validation>
+                <v-data-table
+                  :headers="headers"
+                  :items="detalles"
+                  hide-default-footer
+                >
+                  <template v-slot:item="{ item }">
+                    <detalle-pedido
+                      :detalle="item"
+                      :estilos="estilos"
+                      :materiales="materiales"
+                      :tallas="tallas"
+                      :forros="forros"
+                      :suelas="suelas"
+                      :hormas="hormas"
+                    ></detalle-pedido>
+                  </template>
+                </v-data-table>
+              </v-form>
             </div>
           </v-card>
           <v-card-actions>
@@ -82,10 +81,10 @@
               color="primary"
               depressed
               x-large
-              @click="
-                e1++;
-                savePedido();
+              @click=" 
+                guardarPedido();
               "
+              :disabled="!valid"
             >
               Guardar
             </v-btn>
@@ -109,19 +108,11 @@
       </v-stepper-items>
     </v-stepper>
 
-    <v-snackbar
-      v-model="snackbar.show"
-      :timeout="snackbar.timeout"
-    >
+    <v-snackbar v-model="snackbar.show" :timeout="snackbar.timeout">
       {{ snackbar.msj }}
 
       <template v-slot:action="{ attrs }">
-        <v-btn
-          color="blue"
-          text
-          v-bind="attrs"
-          @click="snackbar.show = false"
-        >
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar.show = false">
           Close
         </v-btn>
       </template>
@@ -131,7 +122,7 @@
 <script>
 import DetallePedido from "../components/DetallePedido.vue";
 import DetalleCliente from "../components/DetalleCliente.vue";
-import { createNamespacedHelpers ,mapState} from "vuex";
+import { createNamespacedHelpers, mapState } from "vuex";
 const { mapGetters, mapMutations, mapActions } = createNamespacedHelpers(
   "pedido"
 );
@@ -143,8 +134,9 @@ export default {
   },
   data() {
     return {
+      valid: false,
       e1: 1,
-      loading1:true,
+      loading1: true,
       headers: [
         {
           text: "Estilo",
@@ -200,7 +192,7 @@ export default {
     async loadData() {
       console.log("Vorher");
       await this.getData();
-      this.loading1=false;
+      this.loading1 = false;
       console.log("Nachher");
       this.setDetalle([]);
       this.agregarDetalleDefault();
@@ -239,7 +231,35 @@ export default {
 
       this.pushDetalle(detalleDefault);
     },
+
+    async guardarPedido() {
+      this.validate();
+      if (!this.valid) return;
+
+
+      const res = await this.savePedido();
+      if (res.data.ok) {
+        this.mostrarMsj("Pedido guardado!");
+        this.e1++;
+      }
+    },
+    mostrarMsj(msj) {
+      this.snackbar.msj = msj;
+      this.snackbar.show = true;
+    },
+
+    validate() {
+      this.valid = this.$refs.form.validate();
+      this.detalles.forEach((detalle) => {
+        if (detalle.subtotal <= 0) {
+          this.valid = false;
+          this.mostrarMsj("Agregue almenos una talla");
+          return;
+        }
+      });
+    },
   },
+
   computed: {
     ...mapState(["snackbar"]),
     ...mapGetters([
