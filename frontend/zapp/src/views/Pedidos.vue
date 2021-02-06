@@ -21,7 +21,7 @@
                   <tr
                     class="fila"
                     v-for="detalle in pedido.detalle"
-                    :key="detalle.estilo._id"
+                    :key="detalle.estilo._rev"
                   >
                     <td>{{ detalle.estilo.codigo }}</td>
                     <td>{{ detalle.detalleMaterial.material.nombre }}</td>

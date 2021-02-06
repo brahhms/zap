@@ -17,7 +17,8 @@
               filled
               rounded
               item-text="codigo"
-              return-object 
+              return-object
+              @change="validarPedido()"
             >
             </v-autocomplete>
           </v-container>
@@ -38,6 +39,7 @@
           <v-container class="mt-3">
             <v-autocomplete
               v-model="detalle.detalleMaterial.material"
+              required
               label="material"
               :items="materiales"
               clearable
@@ -97,7 +99,7 @@
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
-            :rules="notNull"
+              :rules="notNull"
               v-model="detalle.horma"
               label="horma"
               :items="hormas"
@@ -132,7 +134,7 @@
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
-            :rules="notNull"
+              :rules="notNull"
               v-model="detalle.detalleForro.forro"
               label="forro"
               :items="forros"
@@ -178,7 +180,7 @@
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
-            :rules="notNull"
+              :rules="notNull"
               v-model="detalle.detalleSuela.suela"
               label="suela"
               :items="suelas"
@@ -215,11 +217,23 @@
     <td>
       <v-chip>{{ detalle.subtotal }}</v-chip>
     </td>
+
+    <td>
+      <v-row>
+        <v-icon small @click="duplicateDetalle(detalle)">
+          mdi-content-duplicate
+        </v-icon>
+        <v-spacer></v-spacer>
+        <v-icon small @click="removeDetalle(detalle)"> mdi-delete </v-icon>
+      </v-row>
+    </td>
   </tr>
 </template>
 
 <script>
 import SelectorTalla from "../components/SelectorTalla.vue";
+import { createNamespacedHelpers } from "vuex";
+const { mapMutations } = createNamespacedHelpers("pedido");
 
 export default {
   props: [
@@ -235,13 +249,15 @@ export default {
     SelectorTalla,
   },
   data: () => ({
-    notNull: [
-      (v) => !!v || "Este campo es requerido"    ],
+    notNull: [(v) => !!v || "" || "Este campo es requerido"],
     selected: {
       estilo: null,
     },
   }),
-  methods: {},
+  methods: {
+    ...mapMutations(["validarPedido","removeDetalle","duplicateDetalle"]),
+
+  },
 
   watch: {
     "detalle.detalleTallas": {
@@ -251,19 +267,24 @@ export default {
           subtotal += talla.cantidad;
         });
         this.detalle.subtotal = subtotal;
-        
       },
       deep: true,
     },
-    "detalle.detalleMaterial.material"(newVal) {
-      if (newVal != null)
+    "detalle.detalleMaterial.material"(newVal,oldVal) {
+      if (oldVal == null)
         this.detalle.detalleMaterial.color = newVal.defaultColor;
     },
-    "detalle.detalleMaterial.forro"(newVal) {
-      if (newVal != null) this.detalle.detalleForro.color = newVal.defaultColor;
+    "detalle.detalleMaterial.forro"(newVal,oldVal) {
+      if (oldVal == null) this.detalle.detalleForro.color = newVal.defaultColor;
     },
-    "detalle.detalleSuela.material"(newVal) {
-      if (newVal != null) this.detalle.detalleSuela.color = newVal.defaultColor;
+    "detalle.detalleSuela.suela"(newVal,oldVal) {
+      if (oldVal == null) this.detalle.detalleSuela.color = newVal.defaultColor;
+    },
+    detalle: {
+      handler() {
+        this.validarPedido();
+      },
+      deep: true,
     },
   },
   computed: {},

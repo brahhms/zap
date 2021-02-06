@@ -8,13 +8,13 @@
 
         <v-divider></v-divider>
 
-        <v-stepper-step :complete="e1 > 2" step="2">
+        <v-stepper-step :complete="e1 > 2" step="2" editable>
           Agregar Detalle de Pedido
         </v-stepper-step>
 
         <v-divider></v-divider>
 
-        <v-stepper-step step="3"> Vista Previa </v-stepper-step>
+        <v-stepper-step step="3" editable> Resumen </v-stepper-step>
       </v-stepper-header>
 
       <v-stepper-items>
@@ -47,11 +47,13 @@
                   clienteSeleccionado.nombre
                 }}</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-btn icon @click="agregarDetalleDefault()">
+                Semana:{{ semana }}
+                <v-spacer></v-spacer>
+                <v-btn icon @click="addDetalle()">
                   <v-icon>mdi-plus</v-icon>
                 </v-btn>
               </v-app-bar>
-              <v-form ref="form" v-model="valid" lazy-validation>
+              <v-form ref="form" lazy-validation>
                 <v-data-table
                   :headers="headers"
                   :items="detalles"
@@ -68,6 +70,7 @@
                       :hormas="hormas"
                     ></detalle-pedido>
                   </template>
+ 
                 </v-data-table>
               </v-form>
             </div>
@@ -81,10 +84,8 @@
               color="primary"
               depressed
               x-large
-              @click=" 
-                guardarPedido();
-              "
-              :disabled="!valid"
+              @click="guardarPedido()"
+              :disabled="!isPedidoValid"
             >
               Guardar
             </v-btn>
@@ -103,6 +104,9 @@
               Agregar otro pedido
             </v-btn>
             <v-spacer></v-spacer>
+            <v-btn color="primary" depressed x-large @click="e1 = 1">
+              Finalizar
+            </v-btn>
           </v-card-actions>
         </v-stepper-content>
       </v-stepper-items>
@@ -134,7 +138,6 @@ export default {
   },
   data() {
     return {
-      valid: false,
       e1: 1,
       loading1: true,
       headers: [
@@ -183,59 +186,28 @@ export default {
           value: "subtotal",
           width: 2,
         },
+        {
+          text: "Acciones",
+          align: "center",
+          sortable: false,
+          value: "actions",
+          width: 3,
+        },
       ],
     };
   },
   methods: {
-    ...mapActions(["getData", "savePedido"]),
-    ...mapMutations(["pushDetalle", "setDetalle"]),
+    ...mapActions(["savePedido", "iniciarDetalle"]),
+    ...mapMutations(["addDetalle", "validarPedido"]),
     async loadData() {
-      console.log("Vorher");
-      await this.getData();
+      await this.iniciarDetalle();
       this.loading1 = false;
-      console.log("Nachher");
-      this.setDetalle([]);
-      this.agregarDetalleDefault();
-    },
-
-    agregarDetalleDefault() {
-      let detalleDefault = {
-        estilo: null,
-        detalleMaterial: {
-          material: null,
-          color: null,
-        },
-        detalleTallas: null,
-        horma: null,
-        detalleForro: {
-          forro: null,
-          color: null,
-        },
-        detalleSuela: {
-          suela: null,
-          color: null,
-        },
-        subtotal: 0,
-      };
-      detalleDefault.detalleTallas = this.tallas.map((t) => {
-        return {
-          talla: t,
-          cantidad: 0,
-        };
-      });
-      detalleDefault.estilo = this.estilos[0];
-      detalleDefault.detalleMaterial.material = this.materiales[0];
-      detalleDefault.detalleForro.forro = this.forros[0];
-      detalleDefault.detalleSuela.suela = this.suelas[0];
-      detalleDefault.horma = this.hormas[0];
-
-      this.pushDetalle(detalleDefault);
     },
 
     async guardarPedido() {
-      this.validate();
-      if (!this.valid) return;
+      this.validarPedido();
 
+      if (!this.isPedidoValid) return;
 
       const res = await this.savePedido();
       if (res.data.ok) {
@@ -248,16 +220,6 @@ export default {
       this.snackbar.show = true;
     },
 
-    validate() {
-      this.valid = this.$refs.form.validate();
-      this.detalles.forEach((detalle) => {
-        if (detalle.subtotal <= 0) {
-          this.valid = false;
-          this.mostrarMsj("Agregue almenos una talla");
-          return;
-        }
-      });
-    },
   },
 
   computed: {
@@ -272,9 +234,12 @@ export default {
       "suelas",
       "hormas",
       "clientes",
+      "isPedidoValid",
+      "semana",
     ]),
   },
-  created() {
+
+  mounted() {
     this.loadData();
   },
 };

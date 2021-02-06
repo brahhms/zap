@@ -1,15 +1,36 @@
 <template>
-<resumen-pedido></resumen-pedido>
+  <div>
+    <v-simple-table>
+      <template v-slot:default>
+        <thead>
+          <tr>
+            <th class="text-center">Cantidad</th>
+            <th class="text-center">Estilo</th>
+            <th class="text-center">Talla</th>
+            <th class="text-center">Material</th>
+            <th class="text-center">Color</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="de in pedido.detalle" :key="de.estilo.codigo">
+            <td>{{ de.name }}</td>
+            <td>{{ de.calories }}</td>
+            <td>{{ de.calories }}</td>
+            <td>{{ de.calories }}</td>
+            <td>{{ de.calories }}</td>
+          </tr>
+        </tbody>
+      </template>
+    </v-simple-table>
+  </div>
 </template>
 
 
+
+
 <script>
-import ResumenPedido from "../components/ResumenPedido.vue";
 //import { mapMutations } from "vuex";
 export default {
-    components: {
-    ResumenPedido,
-  },
   data() {
     return {
       pedido: {
@@ -290,6 +311,7 @@ export default {
             subtotal: 9,
           },
         ],
+        total: 15,
       },
     };
   },
@@ -300,10 +322,11 @@ export default {
     },
   },
 
-  computed: {},
+  computed: {
+
+  },
   created() {
     //this.ocultarBarra();
   },
 };
 </script>
-

@@ -9,9 +9,12 @@
               flat
               hide-details
               dense
-              :value="t.cantidad"
+             min="0"
+             max="99"
+             step="1"
               type="number"
-              
+              oninput="this.value=this.value.replace(/[^0-9]/g,'');"
+              :rules="rules"
             ></v-text-field>
           </td>
         </tr>
@@ -29,9 +32,27 @@ const { mapGetters } = createNamespacedHelpers("pedido");
 export default {
   props: ["detalleTallas"],
   data() {
-    return {};
+    return {
+      rules:[
+         value => {
+          const pattern = /^[0-9]+/
+          return pattern.test(value) || 'Invalid integer'
+        }
+      ]
+    };
   },
   methods: {},
+
+  watch:{
+    detalleTallas:{
+      deep:true,
+      handler(newVal){
+        newVal.forEach(element => {
+          element.cantidad = (element.cantidad=="" || element.cantidad==null)?0:element.cantidad;          
+        });
+      }
+    }
+  },
 
   computed: {
     ...mapGetters(["tallas"]),
