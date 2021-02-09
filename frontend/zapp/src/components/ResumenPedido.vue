@@ -6,18 +6,16 @@
           <tr>
             <th class="text-center">Cantidad</th>
             <th class="text-center">Estilo</th>
-            <th class="text-center">Talla</th>
             <th class="text-center">Material</th>
             <th class="text-center">Color</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="de in pedido.detalle" :key="de.estilo.codigo">
-            <td>{{ de.name }}</td>
-            <td>{{ de.calories }}</td>
-            <td>{{ de.calories }}</td>
-            <td>{{ de.calories }}</td>
-            <td>{{ de.calories }}</td>
+            <td class="text-center">{{ de.subtotal }}</td>
+            <td class="text-center">{{ de.estilo.codigo }}</td>
+            <td class="text-center">{{ de.detalleMaterial.material.nombre }}</td>
+            <td class="text-center">{{ de.detalleMaterial.color }}</td>
           </tr>
         </tbody>
       </template>
@@ -78,6 +76,7 @@ export default {
                   "azul",
                 ],
               },
+              color:"azul"
             },
             detalleTallas: [
               {

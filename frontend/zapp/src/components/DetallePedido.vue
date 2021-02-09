@@ -255,8 +255,7 @@ export default {
     },
   }),
   methods: {
-    ...mapMutations(["validarPedido","removeDetalle","duplicateDetalle"]),
-
+    ...mapMutations(["validarPedido", "removeDetalle", "duplicateDetalle"]),
   },
 
   watch: {
@@ -270,19 +269,31 @@ export default {
       },
       deep: true,
     },
-    "detalle.detalleMaterial.material"(newVal,oldVal) {
-      if (oldVal == null)
-        this.detalle.detalleMaterial.color = newVal.defaultColor;
-    },
-    "detalle.detalleMaterial.forro"(newVal,oldVal) {
-      if (oldVal == null) this.detalle.detalleForro.color = newVal.defaultColor;
-    },
-    "detalle.detalleSuela.suela"(newVal,oldVal) {
-      if (oldVal == null) this.detalle.detalleSuela.color = newVal.defaultColor;
-    },
+
     detalle: {
-      handler() {
+      handler(newVal) {
         this.validarPedido();
+        if (
+          newVal.detalleMaterial.color == null &&
+          newVal.detalleMaterial.material != null
+        ) {
+          this.detalle.detalleMaterial.color =
+            newVal.detalleMaterial.material.defaultColor;
+        }
+        if (
+          newVal.detalleForro.color == null &&
+          newVal.detalleForro.forro != null
+        ) {
+          this.detalle.detalleForro.color =
+            newVal.detalleForro.forro.defaultColor;
+        }
+        if (
+          newVal.detalleSuela.color == null &&
+          newVal.detalleSuela.suela != null
+        ) {
+          this.detalle.detalleSuela.color =
+            newVal.detalleSuela.suela.defaultColor;
+        }
       },
       deep: true,
     },

@@ -73,13 +73,11 @@ export default {
     pedido: {
       cliente: null,
       fecha: new Date(),
-      semana:semanaDelAno(),
+      semana: semanaDelAno(),
       detalle: []
     },
 
-    resumen:{
-      
-    },
+    resumen: [],
 
     //database
     pedidos: null,
@@ -95,6 +93,14 @@ export default {
     isValid: false
   },
   mutations: {
+
+  //  getResumen(state) {
+    //  let resumen = [];
+   //   state.pedido.detalle.forEach(deta => {
+
+  //    });
+  //  },
+
     setCliente(state, cliente) {
       state.pedido.cliente = cliente;
       if (cliente != null) {
@@ -117,8 +123,8 @@ export default {
       } else if (state.pedido.detalle == null) {
         console.log("detalle vacio");
       } else {
-        let estilos = [];
-        let repetidos = 0;
+       
+        let errores = 0;
         state.pedido.detalle.forEach(deta => {
 
           if (deta.estilo == null ||
@@ -127,21 +133,13 @@ export default {
             deta.detalleSuela.suela == null ||
             deta.horma == null ||
             deta.subtotal <= 0) {
-            repetidos++;
+            errores++;
             console.log("elemento vacio");
-          } else {
-
-            if (estilos.includes(deta.estilo.codigo)) {
-              console.log("codigos repetidos");
-              repetidos++;
-              return
-            }
-            estilos.push(deta.estilo.codigo);
-          }
+          } 
 
         });
 
-        if (repetidos == 0) {
+        if (errores == 0) {
           state.isValid = true;
           console.log("pedido valido");
         }
@@ -176,9 +174,11 @@ export default {
       });
       detalleDefault.estilo = null;
       detalleDefault.detalleMaterial.material = state.materiales[0];
-      detalleDefault.detalleMaterial.color = state.materiales[0].color;
+      detalleDefault.detalleMaterial.color = state.materiales[0].defaultColor;
       detalleDefault.detalleForro.forro = state.forros[0];
+      detalleDefault.detalleForro.color = state.forros[0].defaultColor;
       detalleDefault.detalleSuela.suela = state.suelas[0];
+      detalleDefault.detalleSuela.color = state.suelas[0].defaultColor;
       detalleDefault.horma = state.hormas[0];
 
       state.pedido.detalle.push(detalleDefault);
@@ -197,22 +197,30 @@ export default {
       state.clientes = data[6].data.docs;
     },
 
-    removeDetalle(state,detalle){
+    removeDetalle(state, detalle) {
       let index = state.pedido.detalle.indexOf(detalle);
-      state.pedido.detalle.splice(index,1);
+      state.pedido.detalle.splice(index, 1);
     },
 
-    duplicateDetalle(state,item){
+    duplicateDetalle(state, item) {
       let detalle = Object.assign({}, item);
-      detalle.detalleMaterial = {...item.detalleMaterial};
-      detalle.detalleForro = {...item.detalleForro};
-      detalle.detalleSuela = {... item.detalleSuela};
-      detalle.detalleTallas = item.detalleTallas.map(item=>{
-        return {...item}
+      detalle.detalleMaterial = {
+        ...item.detalleMaterial
+      };
+      detalle.detalleForro = {
+        ...item.detalleForro
+      };
+      detalle.detalleSuela = {
+        ...item.detalleSuela
+      };
+      detalle.detalleTallas = item.detalleTallas.map(item => {
+        return {
+          ...item
+        }
       });
-      
+
       let index = state.pedido.detalle.indexOf(detalle);
-      state.pedido.detalle.splice(index,0,detalle);
+      state.pedido.detalle.splice(index, 0, detalle);
     }
 
   },

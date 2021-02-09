@@ -11,7 +11,7 @@
           width="40"
         />
 
-        <h1>Zapateria</h1>
+        <h1>Fuentes</h1>
       </div>
 
       <v-spacer></v-spacer>

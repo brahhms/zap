@@ -70,7 +70,6 @@
                       :hormas="hormas"
                     ></detalle-pedido>
                   </template>
- 
                 </v-data-table>
               </v-form>
             </div>
@@ -97,7 +96,9 @@
             class="mb-12 paso-contenido text-center"
             color="grey lighten-1"
           >
-            <iframe id="frame" src="/#/pedidos" frameborder="0"></iframe>
+            <div class="embed-container">
+              <iframe id="frame" src="/#/pedidos" frameborder="0"></iframe>
+            </div>
           </v-card>
           <v-card-actions>
             <v-btn color="primary" depressed x-large @click="e1 = 1">
@@ -204,6 +205,10 @@ export default {
       this.loading1 = false;
     },
 
+    recargarIframe(){
+      document.getElementById('frame').contentWindow.location.reload(true);
+    },
+
     async guardarPedido() {
       this.validarPedido();
 
@@ -211,6 +216,7 @@ export default {
 
       const res = await this.savePedido();
       if (res.data.ok) {
+        this.recargarIframe();
         this.mostrarMsj("Pedido guardado!");
         this.e1++;
       }
@@ -219,7 +225,6 @@ export default {
       this.snackbar.msj = msj;
       this.snackbar.show = true;
     },
-
   },
 
   computed: {
@@ -245,22 +250,34 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .paso-contenido {
   height: 320px;
 }
 
-#frame {
-  width: 1200px;
-  height: 530px;
+.embed-container {
+  left: 12.5%;
+  position: relative;
+  padding-bottom: 320px;
+  height: 0;
+  overflow: hidden;
 }
-#frame {
-  -ms-zoom: 0.6;
-  -moz-transform: scale(0.6);
+.embed-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 135%;
+}
+
+.embed-container iframe {
+  -ms-zoom: 0.75;
+  -moz-transform: scale(0.75);
   -moz-transform-origin: 0 0;
-  -o-transform: scale(0.6);
+  -o-transform: scale(0.75);
   -o-transform-origin: 0 0;
-  -webkit-transform: scale(0.6);
+  -webkit-transform: scale(0.75);
   -webkit-transform-origin: 0 0;
 }
 </style>
