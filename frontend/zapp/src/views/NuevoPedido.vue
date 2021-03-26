@@ -2,19 +2,18 @@
   <div class="nuevoPedido">
     <v-stepper v-model="e1">
       <v-stepper-header>
-        <v-stepper-step :complete="e1 > 1" step="1" editable>
+        <v-stepper-step :complete="e1 > 1" step="1" >
           Agregar Cliente
         </v-stepper-step>
 
         <v-divider></v-divider>
 
-        <v-stepper-step :complete="e1 > 2" step="2" editable>
+        <v-stepper-step :complete="e1 > 2" step="2" >
           Agregar Detalle de Pedido
         </v-stepper-step>
 
         <v-divider></v-divider>
 
-        <v-stepper-step step="3" editable> Resumen </v-stepper-step>
       </v-stepper-header>
 
       <v-stepper-items>
@@ -39,7 +38,7 @@
         <v-stepper-content step="2">
           <v-card class="mb-12" color="grey lighten-1">
             <div v-if="clienteSeleccionado != null">
-              <v-app-bar dense flat color="white">
+              <v-app-bar flat color="white">
                 <v-btn icon>
                   <v-icon>mdi-account</v-icon>
                 </v-btn>
@@ -47,7 +46,8 @@
                   clienteSeleccionado.nombre
                 }}</v-toolbar-title>
                 <v-spacer></v-spacer>
-                Semana:{{ semana }}
+                
+                Semana {{semana}}
                 <v-spacer></v-spacer>
                 <v-btn icon @click="addDetalle()">
                   <v-icon>mdi-plus</v-icon>
@@ -83,7 +83,7 @@
               color="primary"
               depressed
               x-large
-              @click="guardarPedido()"
+              @click="guardarPedido();"
               :disabled="!isPedidoValid"
             >
               Guardar
@@ -91,25 +91,7 @@
           </v-card-actions>
         </v-stepper-content>
 
-        <v-stepper-content step="3">
-          <v-card
-            class="mb-12 paso-contenido text-center"
-            color="grey lighten-1"
-          >
-            <div class="embed-container">
-              <iframe id="frame" src="/#/pedidos" frameborder="0"></iframe>
-            </div>
-          </v-card>
-          <v-card-actions>
-            <v-btn color="primary" depressed x-large @click="e1 = 1">
-              Agregar otro pedido
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" depressed x-large @click="e1 = 1">
-              Finalizar
-            </v-btn>
-          </v-card-actions>
-        </v-stepper-content>
+
       </v-stepper-items>
     </v-stepper>
 
@@ -144,39 +126,45 @@ export default {
       headers: [
         {
           text: "Estilo",
-          align: "start",
+          align: "center",
           sortable: false,
           value: "estilo",
-          width: 3,
+         
         },
         {
           text: "Material",
-          align: "start",
+          align: "center",
           sortable: false,
           value: "material",
         },
         {
+          text: "MaterialTacon",
+          align: "center",
+          sortable: false,
+          value: "materialTacon",
+        },
+        {
           text: "Tallas",
-          align: "start",
+          align: "center",
           sortable: false,
           value: "tallas",
         },
         {
           text: "Horma",
-          align: "start",
+          align: "center",
           sortable: false,
           value: "horma",
-          width: 3,
+         
         },
         {
           text: "Forro",
-          align: "start",
+          align: "center",
           sortable: false,
           value: "forro",
         },
         {
           text: "Suela",
-          align: "start",
+          align: "center",
           sortable: false,
           value: "suela",
         },
@@ -195,6 +183,7 @@ export default {
           width: 3,
         },
       ],
+     
     };
   },
   methods: {
@@ -205,9 +194,6 @@ export default {
       this.loading1 = false;
     },
 
-    recargarIframe(){
-      document.getElementById('frame').contentWindow.location.reload(true);
-    },
 
     async guardarPedido() {
       this.validarPedido();
@@ -215,22 +201,22 @@ export default {
       if (!this.isPedidoValid) return;
 
       const res = await this.savePedido();
-      if (res.data.ok) {
-        this.recargarIframe();
+      if (res.status == 201 || res.status == 200) {
         this.mostrarMsj("Pedido guardado!");
-        this.e1++;
+        this.e1=1;
       }
     },
     mostrarMsj(msj) {
       this.snackbar.msj = msj;
       this.snackbar.show = true;
+      
     },
   },
 
   computed: {
     ...mapState(["snackbar"]),
     ...mapGetters([
-      "clienteSeleccionado",
+      "cliente",
       "detalles",
       "estilos",
       "materiales",
@@ -240,8 +226,17 @@ export default {
       "hormas",
       "clientes",
       "isPedidoValid",
-      "semana",
+      "semana"
     ]),
+
+    clienteSeleccionado:{
+      get(){
+        return this.cliente;
+      },
+      set(newCliente){
+        return newCliente;
+      }
+    }
   },
 
   mounted() {

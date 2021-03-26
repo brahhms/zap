@@ -2,8 +2,11 @@
   <tr>
     <td>
       <v-edit-dialog>
-        <span v-if="detalle.estilo != null">{{ detalle.estilo.codigo }}</span>
-        <span v-else>-</span>
+        <span v-if="detalle.estilo != null"
+          >{{ detalle.estilo.linea.nombre
+          }}{{ detalle.estilo.correlativo }}</span
+        >
+        <span v-else>[estilo]</span>
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
@@ -16,25 +19,31 @@
               dense
               filled
               rounded
-              item-text="codigo"
               return-object
               @change="validarPedido()"
             >
+              <template v-slot:selection="data">
+                {{ data.item.linea.nombre }}{{ data.item.correlativo }}
+              </template>
+              <template v-slot:item="data">
+                {{ data.item.linea.nombre }}{{ data.item.correlativo }}
+              </template>
             </v-autocomplete>
           </v-container>
         </template>
       </v-edit-dialog>
     </td>
-
+    <!--material-->
     <td>
       <v-edit-dialog>
         <span v-if="detalle.detalleMaterial.material != null">{{
           detalle.detalleMaterial.material.nombre
         }}</span>
-        <span v-else>-</span>
+        <span v-else>[material] : </span>
         <span v-if="detalle.detalleMaterial.color != null">
           {{ detalle.detalleMaterial.color }}</span
         >
+        <span v-else>[color]</span>
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
@@ -73,6 +82,56 @@
       </v-edit-dialog>
     </td>
 
+    <!--material tacon-->
+    <td>
+      <v-edit-dialog>
+        <span v-if="detalle.detalleTacon.material != null">{{
+          detalle.detalleTacon.material.nombre
+        }}</span>
+        <span v-else>[material] : </span>
+        <span v-if="detalle.detalleTacon.color != null">
+          {{ detalle.detalleTacon.color }}</span
+        >
+        <span v-else>[color]</span>
+        <template v-slot:input>
+          <v-container class="mt-3">
+            <v-autocomplete
+              v-model="detalle.detalleTacon.material"
+              required
+              label="material"
+              :items="materiales"
+              clearable
+              dense
+              filled
+              rounded
+              item-text="nombre"
+              return-object
+              :rules="notNull"
+            >
+              <template v-slot:item="{ item }">
+                {{ item.nombre }}
+              </template>
+              <template v-slot:selection="{ item }">
+                {{ item.nombre }}
+              </template>
+            </v-autocomplete>
+            <v-autocomplete
+              v-if="detalle.detalleTacon.material != null"
+              v-model="detalle.detalleTacon.color"
+              label="color"
+              :items="detalle.detalleTacon.material.colores"
+              clearable
+              dense
+              filled
+              rounded
+              item-text="nombre"
+            ></v-autocomplete>
+          </v-container>
+        </template>
+      </v-edit-dialog>
+    </td>
+
+    <!--tallas-->
     <td>
       <v-dialog>
         <template v-slot:activator="{ on }">
@@ -85,6 +144,9 @@
               <v-chip color="primary" v-if="t.cantidad > 0"
                 >{{ t.cantidad }}/{{ t.talla.nombre }}</v-chip
               >
+              <v-chip v-else color="gray"
+                >{{ t.cantidad }}/{{ t.talla.nombre }}</v-chip
+              >
             </div>
           </v-container>
         </template>
@@ -92,10 +154,11 @@
       </v-dialog>
     </td>
 
+    <!--horma-->
     <td>
       <v-edit-dialog>
         <span v-if="detalle.horma != null">{{ detalle.horma.nombre }}</span>
-        <span v-else>-</span>
+        <span v-else>[horma]</span>
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
@@ -127,10 +190,11 @@
         <span v-if="detalle.detalleForro.forro != null">{{
           detalle.detalleForro.forro.nombre
         }}</span>
-        <span v-else>-</span>
+        <span v-else>[forro] : </span>
         <span v-if="detalle.detalleForro.color != null">
           {{ detalle.detalleForro.color }}</span
         >
+        <span v-else>[color]</span>
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
@@ -173,10 +237,11 @@
         <span v-if="detalle.detalleSuela.suela != null">
           {{ detalle.detalleSuela.suela.nombre }}</span
         >
-        <span v-else>-</span>
+        <span v-else>[suela] : </span>
         <span v-if="detalle.detalleSuela.color != null">
           {{ detalle.detalleSuela.color }}</span
         >
+        <span v-else>[color]</span>
         <template v-slot:input>
           <v-container class="mt-3">
             <v-autocomplete
@@ -198,17 +263,6 @@
                 {{ item.nombre }}
               </template>
             </v-autocomplete>
-            <v-autocomplete
-              v-if="detalle.detalleSuela.suela != null"
-              v-model="detalle.detalleSuela.color"
-              label="color"
-              :items="detalle.detalleSuela.suela.colores"
-              clearable
-              dense
-              filled
-              rounded
-              item-text="nombre"
-            ></v-autocomplete>
           </v-container>
         </template>
       </v-edit-dialog>
@@ -270,9 +324,47 @@ export default {
       deep: true,
     },
 
+    "detalle.detalleMaterial.material"(newVal, oldVal) {
+      try {
+        if (newVal._id != oldVal._id) {
+          this.detalle.detalleMaterial.color = newVal.defaultColor;
+        }
+      } catch (error) {
+        console.log("material null");
+      }
+      if (newVal == null) {
+        this.detalle.detalleMaterial.color = null;
+      }
+    },
+    "detalle.detalleForro.forro"(newVal, oldVal) {
+      try {
+        if (newVal._id != oldVal._id) {
+          this.detalle.detalleForro.color = newVal.defaultColor;
+        }
+      } catch (error) {
+        console.log("forro null");
+      }
+      if (newVal == null) {
+        this.detalle.detalleForro.color = null;
+      }
+    },
+    "detalle.detalleSuela.suela"(newVal, oldVal) {
+      try {
+        if (newVal._id != oldVal._id) {
+          this.detalle.detalleSuela.color = newVal.defaultColor;
+        }
+      } catch (error) {
+        console.log("suela null");
+      }
+      if (newVal == null) {
+        this.detalle.detalleSuela.color = null;
+      }
+    },
+
     detalle: {
       handler(newVal) {
         this.validarPedido();
+
         if (
           newVal.detalleMaterial.color == null &&
           newVal.detalleMaterial.material != null

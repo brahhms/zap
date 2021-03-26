@@ -14,12 +14,61 @@ async function getAll() {
 export default {
   namespaced: true,
   state: {
-    clientes: []
+    nuevoCliente: {
+      _id: undefined,
+      _rev: undefined,
+      nombre: null,
+      codigoPais: null,
+      telefono: null,
+      direccion: null,
+      documento: null
+    },
+    clientes: [],
+    codigos: [
+      {
+        codigo: "+501",
+        pais: "Belice"
+      }, {
+        codigo: "+502",
+        pais: "Guatemala"
+      }, {
+        codigo: "+503",
+        pais: "El Salvador"
+      },
+      {
+        codigo: "+504",
+        pais: "Honduras"
+      },
+      {
+        codigo: "+505",
+        pais: "Nicaragua"
+      },
+      {
+        codigo: "+506",
+        pais: "Costa Rica"
+      },
+      {
+        codigo: "+507",
+        pais: "Panama"
+      },
+    ]
   },
   mutations: {
     setClientes(state, data) {
       state.clientes = data;
       console.log("setClientes");
+    },
+
+    setNuevoCliente(state, cliente) {
+      state.nuevoCliente = cliente;
+    },
+
+    iniciarCliente(state) {
+      state.nuevoCliente = {
+        _id: undefined,
+        _rev: undefined,
+        nombre: null
+      };
     }
 
   },
@@ -34,11 +83,12 @@ export default {
     },
 
     async updateCliente({
-      commit
-    }, cliente) {
-      await axios.put(`${url}${cliente._id}/`, cliente, {
+      commit,
+      state
+    }) {
+      await axios.put(`${url}${state.nuevoCliente._id}/`, state.nuevoCliente, {
         params: {
-          "rev": cliente._rev
+          "rev": state.nuevoCliente._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
@@ -48,24 +98,29 @@ export default {
     },
 
     async saveCliente({
-      commit
-    }, cliente) {
-      const res = await axios.post(`${url}`, cliente, {
+      commit,
+      state
+    }) {
+      let res = await axios.post(`${url}`, state.nuevoCliente, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
+      if (res.data.ok) {
+        console.log("ok");
+        const response = await getAll();
+        commit('setClientes', response.data.docs);
+      }
 
-      const response = await getAll();
-      commit('setClientes', response.data.docs);
-      return res;
+
     },
 
     async deleteCliente({
-      commit
-    }, cliente) {
-      await axios.delete(`${url}${cliente._id}`, {
+      commit,
+      state
+    }) {
+      await axios.delete(`${url}${state.nuevoCliente._id}`, {
         params: {
-          "rev": cliente._rev
+          "rev": state.nuevoCliente._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
@@ -76,6 +131,9 @@ export default {
     }
   },
   getters: {
-    clientes: state => state.clientes
+    clientes: state => state.clientes,
+    codigos: state => state.codigos,
+
+    nuevoCliente: state => state.nuevoCliente
   }
 }

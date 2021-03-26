@@ -1,20 +1,26 @@
 <template>
-  <div class="suela">
-    <v-data-table :headers="headers" :items="items" class="elevation-1">
+  <div class="cliente">
+    <v-data-table
+      :headers="headers"
+      :items="allClientes"
+      class="elevation-1"
+      disable-pagination
+      hide-default-footer
+    >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>SUELAS</v-toolbar-title>
+          <v-toolbar-title>CLIENTES</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog persistent v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Suela
+                Nuevo Cliente
               </v-btn>
             </template>
             <v-card>
               <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
+                <span class="headline">{{ formTitle }} Cliente</span>
               </v-card-title>
 
               <v-card-text>
@@ -22,27 +28,36 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.nombre"
+                        v-model="nuevo.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-combobox
-                        v-model="editedItem.colores"
-                        :items="colores"
-                        label="Colores"
-                        multiple
-                        chips
-                      ></v-combobox>
+                      <v-text-field
+                        v-model="nuevo.documento"
+                        label="Documento"
+                      ></v-text-field>
                     </v-col>
-
+                    <v-col cols="4">
+                      <v-autocomplete
+                        v-model="nuevo.codigoPais"
+                        :items="codigos"
+                        label="Codigo"
+                        return-object
+                        item-text="codigo"
+                      ></v-autocomplete>
+                    </v-col>
+                    <v-col cols="8">
+                      <v-text-field
+                        v-model="nuevo.telefono"
+                        label="Telefono"
+                      ></v-text-field>
+                    </v-col>
                     <v-col cols="12">
-                      <v-select
-                        v-if="editedItem.colores"
-                        :items="editedItem.colores"
-                        v-model="editedItem.defaultColor"
-                        label="Color default"
-                      ></v-select>
+                      <v-text-field
+                        v-model="nuevo.direccion"
+                        label="Direccion"
+                      ></v-text-field>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -50,10 +65,10 @@
 
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">
+                <v-btn color="blue darken-1"  text @click="close">
                   Cancelar
                 </v-btn>
-                <v-btn color="blue darken-1" text @click="save">
+                <v-btn color="blue darken-1" depressed dark text @click="save">
                   Guardar
                 </v-btn>
               </v-card-actions>
@@ -62,7 +77,7 @@
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Desea eliminar este suela?</v-card-title
+                >Desea eliminar esta cliente?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -82,15 +97,15 @@
         <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
         <v-icon small @click="deleteItem(item)"> mdi-delete </v-icon>
       </template>
+
+      <template v-slot:item.telefono="{ item }">
+        <span v-if="item.codigoPais != null"
+          >{{ item.codigoPais.codigo }} {{ item.telefono }}</span
+        >
+        <span v-else>{{ item.telefono }}</span>
+      </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
-      </template>
-      <template v-slot:item.colores="{ item }">
-        <div v-if="item.colores">
-          <v-chip v-for="color in item.colores" :key="color">{{
-            color
-          }}</v-chip>
-        </div>
       </template>
     </v-data-table>
   </div>
@@ -100,7 +115,9 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("suela");
+const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers(
+  "cliente"
+);
 export default {
   data: () => ({
     dialog: false,
@@ -113,49 +130,51 @@ export default {
         value: "nombre",
       },
       {
-        text: "Default color",
+        text: "Documento",
         align: "start",
         sortable: false,
-        value: "defaultColor",
+        value: "documento",
       },
       {
-        text: "Colores",
+        text: "Telefono",
         align: "start",
         sortable: false,
-        value: "colores",
+        value: "telefono",
       },
+      {
+        text: "Direccion",
+        align: "start",
+        sortable: false,
+        value: "direccion",
+      },
+
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    items: [],
     editedIndex: -1,
-    editedItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    defaultItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    colores: [
-      "azul",
-      "verde",
-      "rojo",
-      "cafe",
-      "negro",
-      "blanco",
-      "morado",
-      "celeste",
-      "gris",
-    ],
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["suelas"]),
+    ...mapGetters(["clientes", "nuevoCliente", "codigos"]),
+    allClientes: {
+      set(clientes) {
+        return clientes;
+      },
+      get() {
+        return this.clientes;
+      },
+    },
+    nuevo: {
+      set(cliente) {
+        this.setNuevoCliente(cliente);
+        return cliente;
+      },
+      get() {
+        return this.nuevoCliente;
+      },
+    },
   },
 
   watch: {
@@ -168,49 +187,42 @@ export default {
   },
 
   created() {
-    this.cargarDatos();
+    this.initialize();
   },
 
   methods: {
-    ...mapActions(["getSuelas", "updateSuela", "saveSuela", "deleteSuela"]),
-    async cargarDatos() {
-      await this.getSuelas();
-      this.initialize();
-    },
-    initialize() {
-      this.items = this.suelas.map((suela) => {
-        return {
-          _id: suela._id,
-          _rev: suela._rev,
-          nombre: suela.nombre,
-          defaultColor: suela.defaultColor,
-          colores: suela.colores,
-        };
-      });
+    ...mapActions([
+      "getClientes",
+      "updateCliente",
+      "saveCliente",
+      "deleteCliente",
+    ]),
+    ...mapMutations(["iniciarCliente", "setNuevoCliente"]),
+    async initialize() {
+      await this.getClientes();
     },
 
     editItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.clientes.indexOf(item);
+      this.nuevo = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.clientes.indexOf(item);
+      this.nuevo = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.deleteSuela(this.editedItem);
-      this.items.splice(this.editedIndex, 1);
+      this.deleteCliente();
       this.closeDelete();
     },
 
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarCliente();
         this.editedIndex = -1;
       });
     },
@@ -218,21 +230,18 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarCliente();
         this.editedIndex = -1;
       });
     },
 
-    save() {
+    async save() {
       if (this.editedIndex > -1) {
         //editar
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateSuela(this.editedItem);
+        await this.updateCliente();
       } else {
         //guardar
-        this.items.push(this.editedItem);
-        console.log(this.editedItem);
-        this.saveSuela(this.editedItem);
+        await this.saveCliente();
       }
       this.close();
     },

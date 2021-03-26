@@ -1,15 +1,21 @@
 <template>
-  <div class="cliente">
-    <v-data-table :headers="headers" :items="items" class="elevation-1">
+  <div class="talla">
+    <v-data-table
+      :headers="headers"
+      :items="allTallas"
+      class="elevation-1"
+      disable-pagination
+      hide-default-footer
+    >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>CLIENTES</v-toolbar-title>
+          <v-toolbar-title>TALLAS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog persistent v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Cliente
+                Nueva Talla
               </v-btn>
             </template>
             <v-card>
@@ -22,23 +28,12 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.nombre"
+                        v-model="nueva.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12">
-                      <v-text-field
-                        v-model="editedItem.telefono"
-                        label="Telefono"
-                      ></v-text-field>
-                    </v-col>
+  
 
-                    <v-col cols="12">
-                      <v-text-field
-                        v-model="editedItem.direccion"
-                        label="Direccion"
-                      ></v-text-field>
-                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -57,7 +52,7 @@
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Desea eliminar este cliente?</v-card-title
+                >Desea eliminar esta talla?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -80,7 +75,6 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
-
     </v-data-table>
   </div>
 </template>
@@ -89,7 +83,7 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("cliente");
+const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers("talla");
 export default {
   data: () => ({
     dialog: false,
@@ -101,40 +95,34 @@ export default {
         sortable: false,
         value: "nombre",
       },
-      {
-        text: "Telefono",
-        align: "start",
-        sortable: false,
-        value: "telefono",
-      },
-      {
-        text: "Direccion",
-        align: "start",
-        sortable: false,
-        value: "direccion",
-      },
+ 
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    items: [],
     editedIndex: -1,
-    editedItem: {
-      nombre: "",
-      telefono: "",
-      direccion: [],
-    },
-    defaultItem: {
-      nombre: "",
-      telefono: "",
-      direccion: "",
-    },
-
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "Nuevo" : "Editar";
+      return this.editedIndex === -1 ? "Nueva" : "Editar";
     },
-    ...mapGetters(["clientes"]),
+    ...mapGetters(["tallas","nuevaTalla"]),
+    allTallas: {
+      set(tallas) {
+        return tallas;
+      },
+      get() {
+        return this.tallas;
+      },
+    },
+    nueva: {
+      set(talla) {
+        this.setNuevaTalla(talla);
+        return talla;
+      },
+      get() {
+        return this.nuevaTalla;
+      },
+    },
   },
 
   watch: {
@@ -147,49 +135,38 @@ export default {
   },
 
   created() {
-    this.cargarDatos();
+    this.initialize();
   },
 
   methods: {
-    ...mapActions(["getClientes", "updateCliente", "saveCliente", "deleteCliente"]),
-    async cargarDatos() {
-      await this.getClientes();
-      this.initialize();
-    },
-    initialize() {
-      this.items = this.clientes.map((cliente) => {
-        return {
-          _id: cliente._id,
-          _rev: cliente._rev,
-          nombre: cliente.nombre,
-          telefono: cliente.telefono,
-          direccion: cliente.direccion,
-        };
-      });
+    ...mapActions(["getTallas", "updateTalla", "saveTalla", "deleteTalla"]),
+    ...mapMutations(["iniciarTalla","setNuevaTalla"]),
+    async initialize() {
+      await this.getTallas();
+
     },
 
     editItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.tallas.indexOf(item);
+      this.nueva = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.tallas.indexOf(item);
+      this.nueva = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.deleteCliente(this.editedItem);
-      this.items.splice(this.editedIndex, 1);
+      this.deleteTalla();
       this.closeDelete();
     },
 
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarTalla();
         this.editedIndex = -1;
       });
     },
@@ -197,21 +174,18 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarTalla();
         this.editedIndex = -1;
       });
     },
 
-    save() {
+    async save() {
       if (this.editedIndex > -1) {
         //editar
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateCliente(this.editedItem);
+        await this.updateTalla();
       } else {
         //guardar
-        this.items.push(this.editedItem);
-        
-        this.saveCliente(this.editedItem);
+        await this.saveTalla();
       }
       this.close();
     },

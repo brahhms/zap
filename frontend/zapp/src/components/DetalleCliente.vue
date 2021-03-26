@@ -12,8 +12,7 @@
             clearable
             label="Cliente"
             :items="clientes"
-            v-model="seleccionado"
-            @change="setCliente(seleccionado)"
+            v-model="clienteSeleccionado"
             item-text="nombre"
             required
             return-object
@@ -26,8 +25,7 @@
             color="primary"
             @click="
               step++;
-              setCliente(null);
-              seleccionado = null;
+              clienteSeleccionado = null;
             "
           >
             Crear Nuevo Cliente
@@ -42,20 +40,20 @@
             <v-text-field
               :rules="nombreRules"
               label="Nombre"
-              v-model="cliente.nombre"
+              v-model="clienteForm.nombre"
               type="text"
               required
             ></v-text-field>
             <v-text-field
               :rules="telefonoRules"
               label="Telefono"
-              v-model="cliente.telefono"
+              v-model="clienteForm.telefono"
               type="text"
             ></v-text-field>
             <v-text-field
               :rules="descripcionRules"
-              label="Descripcion"
-              v-model="cliente.descripcion"
+              label="Direccion"
+              v-model="clienteForm.direccion"
               type="text"
             ></v-text-field>
           </v-form>
@@ -67,7 +65,7 @@
             color="primary"
             :disabled="!valid"
             depressed
-            @click="guardarCliente(cliente)"
+            @click="guardarCliente(clienteForm)"
           >
             Crear
           </v-btn>
@@ -96,13 +94,22 @@ export default {
     telefonoRules: [v => ((v == null || v=='') || (!isNaN(v) && v>20000000 && v<80000000 ))  || 'Debe introducir un numero valido'],
     descripcionRules: [],
     step: 1,
-    cliente: { nombre: "", telefono: "", direccion: "" },
-    seleccionado: null,
+    clienteForm:{nombre:'',telefono:'',direccion:''}
+
   }),
 
   computed: {
     ...mapState(["snackbar"]),
-    ...mapGetters(["clientes"]),
+    ...mapGetters(["clientes","cliente"]),
+    clienteSeleccionado:{
+      get(){
+        return this.cliente;
+      },
+      set(cliente){
+        this.setCliente(cliente);
+        return cliente;
+      }
+    },
     currentTitle() {
       switch (this.step) {
         case 1:
@@ -124,7 +131,6 @@ export default {
     cancelar() {
       this.step--;
       this.$refs.form.reset()
-      //this.cliente = { nombre: "", telefono: "", direccion: "" };
     },
 
     async guardarCliente(cliente) {
@@ -133,7 +139,7 @@ export default {
       const res = await this.saveCliente(cliente);
 
       if (res.data.ok) {
-        this.setCliente(cliente);
+        this.clienteSeleccionado = cliente;
         this.snackbar.msj = "Cliente guardado!";
         this.snackbar.show = true;
       }

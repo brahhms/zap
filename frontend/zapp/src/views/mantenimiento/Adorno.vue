@@ -1,15 +1,21 @@
 <template>
-  <div class="forro">
-    <v-data-table :headers="headers" :items="items" class="elevation-1">
+  <div class="adorno">
+    <v-data-table
+      :headers="headers"
+      :items="allAdornos"
+      class="elevation-1"
+      disable-pagination
+      hide-default-footer
+    >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>FORROS</v-toolbar-title>
+          <v-toolbar-title>ADORNOS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog persistent v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Forro
+                Nuevo Adorno
               </v-btn>
             </template>
             <v-card>
@@ -22,28 +28,18 @@
                   <v-row>
                     <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.nombre"
+                        v-model="nuevo.nombre"
                         label="Nombre"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-combobox
-                        v-model="editedItem.colores"
-                        :items="colores"
-                        label="Colores"
-                        multiple
-                        chips
-                      ></v-combobox>
+                      <v-autocomplete
+                        v-model="nuevo.unidad"
+                        :items="unidades"
+                        label="Unidades" 
+                      ></v-autocomplete>
                     </v-col>
 
-                    <v-col cols="12">
-                      <v-select
-                        v-if="editedItem.colores"
-                        :items="editedItem.colores"
-                        v-model="editedItem.defaultColor"
-                        label="Color default"
-                      ></v-select>
-                    </v-col>
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -62,7 +58,7 @@
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Desea eliminar este forro?</v-card-title
+                >Desea eliminar esta adorno?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -85,13 +81,6 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
-      <template v-slot:item.colores="{ item }">
-        <div v-if="item.colores">
-          <v-chip v-for="color in item.colores" :key="color">{{
-            color
-          }}</v-chip>
-        </div>
-      </template>
     </v-data-table>
   </div>
 </template>
@@ -100,7 +89,7 @@
 
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("forro");
+const { mapGetters, mapActions, mapMutations } = createNamespacedHelpers("adorno");
 export default {
   data: () => ({
     dialog: false,
@@ -113,49 +102,38 @@ export default {
         value: "nombre",
       },
       {
-        text: "Default color",
+        text: "Unidad",
         align: "start",
         sortable: false,
-        value: "defaultColor",
-      },
-      {
-        text: "Colores",
-        align: "start",
-        sortable: false,
-        value: "colores",
+        value: "unidad",
       },
       { text: "Acciones", value: "actions", sortable: false },
     ],
-    items: [],
     editedIndex: -1,
-    editedItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    defaultItem: {
-      nombre: "",
-      defaultColor: "",
-      colores: [],
-    },
-    colores: [
-      "azul",
-      "verde",
-      "rojo",
-      "cafe",
-      "negro",
-      "blanco",
-      "morado",
-      "celeste",
-      "gris",
-    ],
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["forros"]),
+    ...mapGetters(["adornos", "unidades","nuevoAdorno"]),
+    allAdornos: {
+      set(adornos) {
+        return adornos;
+      },
+      get() {
+        return this.adornos;
+      },
+    },
+    nuevo: {
+      set(adorno) {
+        this.setNuevoAdorno(adorno);
+        return adorno;
+      },
+      get() {
+        return this.nuevoAdorno;
+      },
+    },
   },
 
   watch: {
@@ -168,49 +146,38 @@ export default {
   },
 
   created() {
-    this.cargarDatos();
+    this.initialize();
   },
 
   methods: {
-    ...mapActions(["getForros", "updateForro", "saveForro", "deleteForro"]),
-    async cargarDatos() {
-      await this.getForros();
-      this.initialize();
-    },
-    initialize() {
-      this.items = this.forros.map((forro) => {
-        return {
-          _id: forro._id,
-          _rev: forro._rev,
-          nombre: forro.nombre,
-          defaultColor: forro.defaultColor,
-          colores: forro.colores,
-        };
-      });
+    ...mapActions(["getAdornos", "updateAdorno", "saveAdorno", "deleteAdorno"]),
+    ...mapMutations(["iniciarAdorno","setNuevoAdorno"]),
+    async initialize() {
+      await this.getAdornos();
+
     },
 
     editItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.adornos.indexOf(item);
+      this.nuevo = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.items.indexOf(item);
-      this.editedItem = Object.assign({}, item);
+      this.editedIndex = this.adornos.indexOf(item);
+      this.nuevo = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.deleteForro(this.editedItem);
-      this.items.splice(this.editedIndex, 1);
+      this.deleteAdorno();
       this.closeDelete();
     },
 
     close() {
       this.dialog = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarAdorno();
         this.editedIndex = -1;
       });
     },
@@ -218,21 +185,18 @@ export default {
     closeDelete() {
       this.dialogDelete = false;
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
+        this.iniciarAdorno();
         this.editedIndex = -1;
       });
     },
 
-    save() {
+    async save() {
       if (this.editedIndex > -1) {
         //editar
-        Object.assign(this.items[this.editedIndex], this.editedItem);
-        this.updateForro(this.editedItem);
+        await this.updateAdorno();
       } else {
         //guardar
-        this.items.push(this.editedItem);
-        console.log(this.editedItem);
-        this.saveForro(this.editedItem);
+        await this.saveAdorno();
       }
       this.close();
     },

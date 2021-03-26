@@ -1,7 +1,7 @@
 import axios from 'axios'
 import credentials from "./credentials.js";
 
-const url = "http://localhost:5984/zapp-tallas/";
+const url = "http://localhost:5984/zapp-adornos/";
 
 async function getAll() {
   const response = await axios.post(`${url}_find`, {
@@ -14,100 +14,102 @@ async function getAll() {
 export default {
   namespaced: true,
   state: {
-    nuevaTalla: {
+    nuevoAdorno: {
       _id: undefined,
       _rev: undefined,
       nombre: null,
       cantidad: 0,
       unidad: "pares"
     },
-    tallas: [],
+    adornos: [],
     unidades: ["pares",
       "pares en pliego",
       "galones"
     ]
   },
   mutations: {
-    setTallas(state, data) {
-      state.tallas = data;
-      console.log("setTallas");
+    setAdornos(state, data) {
+      state.adornos = data;
+      console.log("setAdornos");
     },
 
-    setNuevaTalla(state, talla) {
-      state.nuevaTalla = talla;
+    setNuevoAdorno(state, adorno) {
+      state.nuevoAdorno = adorno;
     },
 
-    iniciarTalla(state) {
-      state.nuevaTalla = {
+    iniciarAdorno(state) {
+      state.nuevoAdorno = {
         _id: undefined,
         _rev: undefined,
-        nombre: null
+        nombre: null,
+        cantidad: 0,
+        unidad: "pares"
       };
     }
 
   },
   actions: {
-    async getTallas({
+    async getAdornos({
       commit
     }) {
       const res = await axios.post(`${url}_find`, {
         "selector": {}
       }, credentials.authentication);
-      commit('setTallas', res.data.docs);
+      commit('setAdornos', res.data.docs);
     },
 
-    async updateTalla({
+    async updateAdorno({
       commit,
       state
     }) {
-      await axios.put(`${url}${state.nuevaTalla._id}/`, state.nuevaTalla, {
+      await axios.put(`${url}${state.nuevoAdorno._id}/`, state.nuevoAdorno, {
         params: {
-          "rev": state.nuevaTalla._rev
+          "rev": state.nuevoAdorno._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
       const response = await getAll();
-      commit('setTallas', response.data.docs);
+      commit('setAdornos', response.data.docs);
     },
 
-    async saveTalla({
+    async saveAdorno({
       commit,
       state
     }) {
-      let res = await axios.post(`${url}`, state.nuevaTalla, {
+      let res = await axios.post(`${url}`, state.nuevoAdorno, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
       if (res.data.ok) {
         console.log("ok");
         const response = await getAll();
-        commit('setTallas', response.data.docs);
+        commit('setAdornos', response.data.docs);
       }
 
 
     },
 
-    async deleteTalla({
+    async deleteAdorno({
       commit,
       state
     }) {
-      await axios.delete(`${url}${state.nuevaTalla._id}`, {
+      await axios.delete(`${url}${state.nuevoAdorno._id}`, {
         params: {
-          "rev": state.nuevaTalla._rev
+          "rev": state.nuevoAdorno._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
       const response = await getAll();
-      commit('setTallas', response.data.docs);
+      commit('setAdornos', response.data.docs);
     }
   },
   getters: {
-    tallas: state => state.tallas,
+    adornos: state => state.adornos,
     unidades: state => state.unidades,
 
-    nuevaTalla: state => state.nuevaTalla
+    nuevoAdorno: state => state.nuevoAdorno
   }
 }

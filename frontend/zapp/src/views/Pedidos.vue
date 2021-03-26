@@ -2,7 +2,7 @@
   <v-container>
     <div class="contenedor">
       <div class="columna">
-        <div class="pedido" v-for="pedido in pedidos" :key="pedido._rev">
+        <div class="pedido" v-for="pedido in pedidos" :key="pedido._id">
           <v-row>
             <v-col style="font-size: 14px; font-weight: bold">
               {{ pedido.cliente.nombre }}
@@ -20,8 +20,8 @@
                   <tbody>
                     <tr
                       class="fila"
-                      v-for="detalle in pedido.detalle"
-                      :key="detalle.estilo._rev"
+                      v-for="(detalle, index) in pedido.detalle"
+                      :key="index"
                     >
                       <td>{{ detalle.estilo.codigo }}</td>
                       <td>{{ detalle.detalleMaterial.material.nombre }}</td>
@@ -33,9 +33,11 @@
                             v-for="detalleTallas in detalle.detalleTallas"
                             :key="detalleTallas.talla._id"
                           >
-                            {{ detalleTallas.cantidad }}/{{
-                              detalleTallas.talla.nombre
-                            }}
+                            <span
+                              >{{ detalleTallas.cantidad }}/{{
+                                detalleTallas.talla.nombre
+                              }},
+                            </span>
                           </v-col></v-row
                         >
                       </td>

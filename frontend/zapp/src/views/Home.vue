@@ -1,109 +1,149 @@
 <template>
-  <div class="home">
-    <v-container>
-      <v-row>
-        <v-col cols="6">
-          <v-card class="tarjeta">
+  <v-row class="fill-height">
+    <v-col>
+      <v-sheet height="64">
+        <v-toolbar flat>
+          <v-btn outlined class="mr-4" color="grey darken-2" @click="setToday">
+            Hoy
+          </v-btn>
+          <v-btn fab dark small color="primary" @click="prev">
+            <v-icon x-large> mdi-chevron-left </v-icon>
+          </v-btn>
+
+          <v-toolbar-title v-if="$refs.calendar">
+            {{ $refs.calendar.title }}
+          </v-toolbar-title>
+          <v-btn fab dark small color="primary darken-1" @click="next">
+            <v-icon x-large> mdi-chevron-right </v-icon>
+          </v-btn>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+      </v-sheet>
+      <v-sheet height="600">
+        <v-calendar
+          show-week
+          ref="calendar"
+          v-model="focus"
+          type="month"
+          @change="updateRange"
+          :weekdays="weekdays"
+          locale="es"
+        >
+          <template v-slot:day="{ weekday, day, month, year }">
             <v-btn
-              class="v-btn"
-              min-height="100%"
+              @click="openDialog(semanaDelAno(year, month, day), year)"
+              v-if="weekday == 1"
               block
-              text
-              :to="{ name: 'NuevoPedido' }"
-              >Nuevo Pedido</v-btn
+              color="primary"
+              outlined
+              tile
+              >Semana {{ semanaDelAno(year, month, day) }}</v-btn
             >
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card class="tarjeta">
-            <v-btn
-              class="v-btn"
-              min-height="100%"
-              block
-              text
-              :to="{ name: 'MantenimientoEstilo' }"
-              >Estilos</v-btn
-            >
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card class="tarjeta">
-            <v-btn
-              class="v-btn"
-              min-height="100%"
-              block
-              text
-              :to="{ name: 'MantenimientoMaterial' }"
-              >Materiales</v-btn
-            >
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card class="tarjeta">
-            <v-btn
-              class="v-btn"
-              min-height="100%"
-              block
-              text
-              :to="{ name: 'MantenimientoForro' }"
-              >Forros</v-btn
-            >
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card class="tarjeta">
-            <v-btn
-              class="v-btn"
-              min-height="100%"
-              block
-              text
-              :to="{ name: 'MantenimientoSuela' }"
-              >Suelas</v-btn
-            >
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card class="tarjeta">
-            <v-btn
-              class="v-btn"
-              min-height="100%"
-              block
-              text
-              :to="{ name: 'MantenimientoCliente' }"
-              >Clientes</v-btn
-            >
-          </v-card>
-        </v-col>
-        <v-col cols="3">
-          <v-card class="tarjeta">
-            <v-btn
-              class="v-btn"
-              min-height="100%"
-              block
-              text
-              :to="{ name: 'Pedidos' }"
-              >Pedidos</v-btn
-            >
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </div>
+          </template>
+        </v-calendar>
+      </v-sheet>
+      <v-dialog
+        v-model="dialog"
+        fullscreen
+        hide-overlay
+        transition="dialog-bottom-transition"
+      >
+        <v-card>
+          <v-toolbar dark color="primary">
+            <v-btn icon dark @click="dialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+            <v-toolbar-title>Semana {{ semana }} {{ ano }}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-toolbar-items>
+              <v-btn dark text :to="{ name: 'NuevoPedido' }">
+                Nuevo Pedido
+              </v-btn>
+            </v-toolbar-items>
+          </v-toolbar>
+
+          <v-divider></v-divider>
+
+          <lista-pedidos :pedidos="pedidos"></lista-pedidos>
+        </v-card>
+      </v-dialog>
+    </v-col>
+  </v-row>
 </template>
 
+
 <script>
+import ListaPedidos from "../components/ListaPedidos";
+import { createNamespacedHelpers } from "vuex";
+
+const {
+  mapActions: mapActionsSemana,
+  mapGetters: mapGettersSemana,
+  mapMutations: mapMutationsSemana,
+} = createNamespacedHelpers("semana");
+Date.prototype.getWeekNumber = function () {
+  var d = new Date(+this); //Creamos un nuevo Date con la fecha de "this".
+  d.setHours(0, 0, 0, 0); //Nos aseguramos de limpiar la hora.
+  d.setDate(d.getDate() + 0 - (d.getDay() || 7)); // Recorremos los días para asegurarnos de estar "dentro de la semana"
+  //Finalmente, calculamos redondeando y ajustando por la naturaleza de los números en JS:
+  return Math.ceil(((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7 + 1) / 7);
+};
+
 export default {
-  name: "Home",
-  components: {},
+  components: {
+    ListaPedidos,
+  },
+  data: () => ({
+    dialog: false,
+    focus: "",
+    type: "month",
+    weekdays: [0, 1, 2, 3, 4, 5, 6],
+  }),
+  mounted() {
+    this.$refs.calendar.checkChange();
+  },
+  methods: {
+    ...mapMutationsSemana(["setSemanaSemana","setAnoSemana"]),
+    ...mapActionsSemana(["getPedidosSemana"]),
+    updateRange({ start, end }) {
+      console.log("//" + start.date + "--" + end.date);
+    },
+    setToday() {
+      this.focus = "";
+    },
+    prev() {
+      this.$refs.calendar.prev();
+    },
+    next() {
+      this.$refs.calendar.next();
+    },
+    async openDialog(semana, ano) {
+
+      this.setSemanaSemana(semana);
+      this.setAnoSemana(ano);
+      await this.getPedidosSemana();
+
+      this.dialog = true;
+
+    },
+
+    semanaDelAno(year, mes, dia) {
+      mes--;
+      //console.log("DelAno: " + year + "-" + mes + "-" + dia);
+      let fech = new Date(year, mes, dia);
+      //console.log(fech);
+      return fech.getWeekNumber();
+    },
+  },
+  computed: {
+    ...mapGettersSemana(["pedidos","semana","ano"]),
+  },
 };
 </script>
 
-<style scoped>
-.tarjeta {
-  height: 200px;
-}
 
-.v-btn {
-  font-size: 1.1em !important;
+<style scoped>
+.btn {
+  z-index: 300 !important;
 }
 </style>

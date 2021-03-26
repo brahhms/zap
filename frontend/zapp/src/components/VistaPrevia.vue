@@ -1,14 +1,14 @@
 <template>
-<resumen-pedido></resumen-pedido>
+<lista-pedidos></lista-pedidos>
 </template>
 
 
 <script>
-import ResumenPedido from "../components/ResumenPedido.vue";
+import ListaPedidos from "./ListaPedidos.vue";
 //import { mapMutations } from "vuex";
 export default {
     components: {
-    ResumenPedido,
+    ListaPedidos,
   },
   data() {
     return {

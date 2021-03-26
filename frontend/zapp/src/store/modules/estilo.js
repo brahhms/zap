@@ -23,12 +23,36 @@ async function createAttachment(att, id, rev) {
 export default {
   namespaced: true,
   state: {
-    estilos: []
+    nuevoEstilo: {
+      _id: undefined,
+      _rev: undefined,
+      linea: null,
+      correlativo: null,
+      rendimientoPorYarda: null,
+      capeyada: null,
+      tacon: true,
+      avillos: [],
+      adornos: [],
+      _attachments: undefined
+    },
+    estilos: [],
+    lineas: [],
   },
   mutations: {
     setEstilos(state, data) {
       state.estilos = data;
       console.log("setEstilos");
+    },
+
+    setData(state, data) {
+      state.lineas = data[0].data.docs;
+      state.nuevoEstilo.avillos = data[1].data.docs;
+      state.nuevoEstilo.adornos = data[2].data.docs;
+
+    },
+
+    setNuevoEstilo(state, estilo) {
+      state.nuevoEstilo = estilo;
     }
 
   },
@@ -43,19 +67,24 @@ export default {
     },
 
     async updateEstilo({
-      commit
-    }, estilo) {
-      const res = await axios.put(`${url}${estilo._id}/`, estilo, {
+      commit,
+      state
+    }) {
+      const res = await axios.put(`${url}${state.nuevoEstilo._id}/`, state.nuevoEstilo, {
         params: {
-          "rev": estilo._rev
+          "rev": state.nuevoEstilo._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
-      let att = estilo._attachments;
+      let att = state.nuevoEstilo._attachments;
       if (res.data.ok && att != null && att != undefined) {
         await createAttachment(att, res.data.id, res.data.rev);
+      }
+
+      if (res.data.ok) {
+        console.log("ok");
       }
 
       const response = await getAll();
@@ -63,14 +92,15 @@ export default {
     },
 
     async saveEstilo({
-      commit
-    }, estilo) {
-      const res = await axios.post(`${url}`, estilo, {
+      commit,
+      state
+    }) {
+      const res = await axios.post(`${url}`, state.nuevoEstilo, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers
       }, credentials.authentication);
 
-      let att = estilo._attachments;
+      let att = state.nuevoEstilo._attachments;
       if (res.data.ok && att != null && att != undefined) {
         await createAttachment(att, res.data.id, res.data.rev);
       }
@@ -80,11 +110,12 @@ export default {
     },
 
     async deleteEstilo({
-      commit
-    }, estilo) {
-      await axios.delete(`${url}${estilo._id}`, {
+      commit,
+      state
+    }) {
+      await axios.delete(`${url}${state.nuevoEstilo._id}`, {
         params: {
-          "rev": estilo._rev
+          "rev": state.nuevoEstilo._rev
         },
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
@@ -94,8 +125,29 @@ export default {
       commit('setEstilos', response.data.docs);
     },
 
+    async iniciarEstilo({
+      commit
+    }) {
+      const data = await axios.all([
+        axios.post(`http://localhost:5984/zapp-lineas/_find`, {
+          "selector": {}
+        }, credentials.authentication),
+        axios.post('http://localhost:5984/zapp-avillos/_find', {
+          "selector": {}
+        }, credentials.authentication),
+        axios.post('http://localhost:5984/zapp-adornos/_find', {
+          "selector": {}
+        }, credentials.authentication),
+      ]);
+      commit('setData', data);
+    }
+
   },
   getters: {
-    estilos: state => state.estilos
+    estilos: state => state.estilos,
+
+
+    lineas: state => state.lineas,
+    nuevoEstilo: state => state.nuevoEstilo
   }
 }

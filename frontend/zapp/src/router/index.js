@@ -3,11 +3,16 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Pedidos from '../views/Pedidos.vue'
 import NuevoPedido from '../views/NuevoPedido.vue'
-import MantenimientoForro from '../views/MantenimientoForro.vue'
-import MantenimientoMaterial from '../views/MantenimientoMaterial.vue'
-import MantenimientoSuela from '../views/MantenimientoSuela.vue'
-import MantenimientoEstilo from '../views/MantenimientoEstilo.vue'
-import MantenimientoCliente from '../views/MantenimientoCliente.vue'
+import Forro from '../views/mantenimiento/Forro.vue'
+import Material from '../views/mantenimiento/Material.vue'
+import Suela from '../views/mantenimiento/Suela.vue'
+import Estilo from '../views/mantenimiento/Estilo.vue'
+import Cliente from '../views/mantenimiento/Cliente.vue'
+import Horma from "../views/mantenimiento/Horma.vue";
+import Adorno from "../views/mantenimiento/Adorno.vue";
+import Avillo from "../views/mantenimiento/Avillo.vue";
+import Talla from "../views/mantenimiento/Talla.vue";
+
 import VistaPrevia from '../components/VistaPrevia.vue'
 
 Vue.use(VueRouter)
@@ -29,29 +34,49 @@ const routes = [
     component: NuevoPedido
   },
   {
-    path: '/mantenimientoForro',
-    name: 'MantenimientoForro',
-    component: MantenimientoForro
+    path: '/Forro',
+    name: 'Forro',
+    component: Forro
   },
   {
-    path: '/mantenimientoMaterial',
-    name: 'MantenimientoMaterial',
-    component: MantenimientoMaterial
+    path: '/Material',
+    name: 'Material',
+    component: Material
   },
   {
-    path: '/mantenimientoSuela',
-    name: 'MantenimientoSuela',
-    component: MantenimientoSuela
+    path: '/Suela',
+    name: 'Suela',
+    component: Suela
   },
   {
-    path: '/mantenimientoEstilo',
-    name: 'MantenimientoEstilo',
-    component: MantenimientoEstilo
+    path: '/Estilo',
+    name: 'Estilo',
+    component: Estilo
   },
   {
-    path: '/mantenimientoCliente',
-    name: 'MantenimientoCliente',
-    component: MantenimientoCliente
+    path: '/Cliente',
+    name: 'Cliente',
+    component: Cliente
+  },
+  {
+    path: '/Adorno',
+    name: 'Adorno',
+    component: Adorno
+  },
+  {
+    path: '/Avillo',
+    name: 'Avillo',
+    component: Avillo
+  },
+  {
+    path: '/Horma',
+    name: 'Horma',
+    component: Horma
+  },
+  {
+    path: '/Talla',
+    name: 'Talla',
+    component: Talla
   },
   {
     path: '/vistaPrevia',

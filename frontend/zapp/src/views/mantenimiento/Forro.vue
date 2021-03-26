@@ -1,15 +1,21 @@
 <template>
-  <div class="estilo">
-    <v-data-table :headers="headers" :items="items" class="elevation-1">
+  <div class="forro">
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      class="elevation-1"
+      disable-pagination
+      hide-default-footer
+    >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>ESTILOS</v-toolbar-title>
+          <v-toolbar-title>FORROS</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog persistent v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nuevo Estilo
+                Nuevo Forro
               </v-btn>
             </template>
             <v-card>
@@ -20,34 +26,29 @@
               <v-card-text>
                 <v-container>
                   <v-row>
-                    <v-col cols="12" sm="6" md="4">
+                    <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.codigo"
-                        label="Codigo"
+                        v-model="editedItem.nombre"
+                        label="Nombre"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.descripcion"
-                        label="Descripcion"
-                      ></v-text-field>
+                    <v-col cols="12">
+                      <v-combobox
+                        v-model="editedItem.colores"
+                        :items="colores"
+                        label="Colores"
+                        multiple
+                        chips
+                      ></v-combobox>
                     </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-checkbox
-                        v-model="editedItem.tacon"
-                        label="Tacon"
-                        color="primary"
-                        hide-details
-                      ></v-checkbox>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-file-input
-                        label="Imagen"
-                        v-model="editedItem._attachments"
-                        show-size
-                        small-chips
-                        truncate-length="9"
-                      ></v-file-input>
+
+                    <v-col cols="12">
+                      <v-select
+                        v-if="editedItem.colores"
+                        :items="editedItem.colores"
+                        v-model="editedItem.defaultColor"
+                        label="Color default"
+                      ></v-select>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -67,7 +68,7 @@
           <v-dialog v-model="dialogDelete" max-width="500px">
             <v-card>
               <v-card-title class="headline"
-                >Desea eliminar este estilo?</v-card-title
+                >Desea eliminar este forro?</v-card-title
               >
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -90,94 +91,77 @@
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize"> Reset </v-btn>
       </template>
-      <template v-slot:item.tacon="{ item }">
-        <v-simple-checkbox v-model="item.tacon" disabled></v-simple-checkbox>
-      </template>
-      <template v-slot:item.img="{ item }">
-        <v-chip v-if="item._attachments"> imagen</v-chip>
-        <span v-else>sin imagen</span>
+      <template v-slot:item.colores="{ item }">
+        <div v-if="item.colores">
+          <v-chip v-for="color in item.colores" :key="color">{{
+            color
+          }}</v-chip>
+        </div>
       </template>
     </v-data-table>
-
-    <v-container fluid>
-      <v-row dense>
-        <v-col v-for="card in cards" :key="card.title" :cols="card.flex">
-          <v-card>
-            <v-img
-            :key="card.rev"
-              :src="card.src"
-              class="white--text align-end"
-              gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-              height="200px"
-            >
-              <v-card-title v-text="card.title"></v-card-title>
-            </v-img>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
   </div>
 </template>
 
 
 
-
 <script>
 import { createNamespacedHelpers } from "vuex";
-const { mapGetters, mapActions } = createNamespacedHelpers("estilo");
+const { mapGetters, mapActions } = createNamespacedHelpers("forro");
 export default {
   data: () => ({
     dialog: false,
     dialogDelete: false,
     headers: [
       {
-        text: "Codigo",
+        text: "Nombre",
         align: "start",
         sortable: false,
-        value: "codigo",
+        value: "nombre",
       },
       {
-        text: "Descripcion",
+        text: "Default color",
         align: "start",
         sortable: false,
-        value: "descripcion",
+        value: "defaultColor",
       },
       {
-        text: "Tacon",
+        text: "Colores",
         align: "start",
         sortable: false,
-        value: "tacon",
-      },
-      {
-        text: "Imagen",
-        align: "start",
-        sortable: false,
-        value: "img",
+        value: "colores",
       },
       { text: "Acciones", value: "actions", sortable: false },
     ],
     items: [],
     editedIndex: -1,
     editedItem: {
-      codigo: "",
-      descripcion: "",
-      tacon: false,
-      _attachments: null,
+      nombre: "",
+      defaultColor: "",
+      colores: [],
     },
     defaultItem: {
-      codigo: "",
-      descripcion: "",
-      tacon: false,
-      _attachments: null,
+      nombre: "",
+      defaultColor: "",
+      colores: [],
     },
-    cards: []
+    colores: [
+      "azul",
+      "verde",
+      "rojo",
+      "cafe",
+      "negro",
+      "blanco",
+      "morado",
+      "celeste",
+      "gris",
+    ],
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1 ? "Nuevo" : "Editar";
     },
-    ...mapGetters(["estilos"]),
+    ...mapGetters(["forros"]),
   },
 
   watch: {
@@ -194,35 +178,19 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      "getEstilos",
-      "updateEstilo",
-      "saveEstilo",
-      "deleteEstilo",
-      "saveAttachment",
-    ]),
-
+    ...mapActions(["getForros", "updateForro", "saveForro", "deleteForro"]),
     async cargarDatos() {
-      await this.getEstilos();
+      await this.getForros();
       this.initialize();
     },
     initialize() {
-      this.items = this.estilos.map((estilo) => {
+      this.items = this.forros.map((forro) => {
         return {
-          _id: estilo._id,
-          _rev: estilo._rev,
-          codigo: estilo.codigo,
-          descripcion: estilo.descripcion,
-          tacon: estilo.tacon,
-          _attachments: estilo._attachments,
-        };
-      });
-      this.cards = this.items.map((item) => {
-        return {
-          title: item.codigo,
-          src: `http://localhost:5984/zapp-estilos/${item._id}/img`,
-          flex: 3,
-          rev:item._rev
+          _id: forro._id,
+          _rev: forro._rev,
+          nombre: forro.nombre,
+          defaultColor: forro.defaultColor,
+          colores: forro.colores,
         };
       });
     },
@@ -240,7 +208,7 @@ export default {
     },
 
     deleteItemConfirm() {
-      this.deleteEstilo(this.editedItem);
+      this.deleteForro(this.editedItem);
       this.items.splice(this.editedIndex, 1);
       this.closeDelete();
     },
@@ -261,17 +229,16 @@ export default {
       });
     },
 
-    async save() {
+    save() {
       if (this.editedIndex > -1) {
         //editar
-        await this.updateEstilo(this.editedItem);
-        Object.assign(this.items[this.editedIndex], this.editedItem); 
-      
-
+        Object.assign(this.items[this.editedIndex], this.editedItem);
+        this.updateForro(this.editedItem);
       } else {
         //guardar
-        await this.saveEstilo(this.editedItem);
-        this.items.push(this.editedItem);        
+        this.items.push(this.editedItem);
+        console.log(this.editedItem);
+        this.saveForro(this.editedItem);
       }
       this.close();
     },
