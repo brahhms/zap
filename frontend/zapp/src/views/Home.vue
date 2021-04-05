@@ -48,12 +48,15 @@
         hide-overlay
         transition="dialog-bottom-transition"
       >
-        <v-card>
+        <v-card :loading="loading">
           <v-toolbar dark color="primary">
             <v-btn icon dark @click="dialog = false">
               <v-icon>mdi-close</v-icon>
             </v-btn>
-            <v-toolbar-title>Semana {{ semana }} {{ ano }}</v-toolbar-title>
+            <v-toolbar-title
+              >Semana {{ semanaSeleccionada.semana }}
+              {{ semanaSeleccionada.ano }}</v-toolbar-title
+            >
             <v-spacer></v-spacer>
             <v-toolbar-items>
               <v-btn dark text :to="{ name: 'NuevoPedido' }">
@@ -64,7 +67,7 @@
 
           <v-divider></v-divider>
 
-          <lista-pedidos :pedidos="pedidos"></lista-pedidos>
+          <lista-pedidos></lista-pedidos>
         </v-card>
       </v-dialog>
     </v-col>
@@ -77,10 +80,10 @@ import ListaPedidos from "../components/ListaPedidos";
 import { createNamespacedHelpers } from "vuex";
 
 const {
-  mapActions: mapActionsSemana,
-  mapGetters: mapGettersSemana,
-  mapMutations: mapMutationsSemana,
-} = createNamespacedHelpers("semana");
+  mapMutations: mapMutationsPedido,
+  mapGetters: mapGettersPedido,
+  mapActions: mapActionsPedido,
+} = createNamespacedHelpers("pedido");
 Date.prototype.getWeekNumber = function () {
   var d = new Date(+this); //Creamos un nuevo Date con la fecha de "this".
   d.setHours(0, 0, 0, 0); //Nos aseguramos de limpiar la hora.
@@ -98,13 +101,14 @@ export default {
     focus: "",
     type: "month",
     weekdays: [0, 1, 2, 3, 4, 5, 6],
+    loading: true,
   }),
   mounted() {
     this.$refs.calendar.checkChange();
   },
   methods: {
-    ...mapMutationsSemana(["setSemanaSemana","setAnoSemana"]),
-    ...mapActionsSemana(["getPedidosSemana"]),
+     ...mapMutationsPedido(["setSemanaPedido", "setAnoPedido","actualizarPedidos"]),
+    ...mapActionsPedido(["getSemana"]),
     updateRange({ start, end }) {
       console.log("//" + start.date + "--" + end.date);
     },
@@ -118,13 +122,11 @@ export default {
       this.$refs.calendar.next();
     },
     async openDialog(semana, ano) {
-
-      this.setSemanaSemana(semana);
-      this.setAnoSemana(ano);
-      await this.getPedidosSemana();
-
       this.dialog = true;
-
+      this.setSemanaPedido(semana);
+      this.setAnoPedido(ano);
+      await this.getSemana();
+      this.loading = false;
     },
 
     semanaDelAno(year, mes, dia) {
@@ -136,7 +138,7 @@ export default {
     },
   },
   computed: {
-    ...mapGettersSemana(["pedidos","semana","ano"]),
+    ...mapGettersPedido(["semanaSeleccionada"]),
   },
 };
 </script>

@@ -9,28 +9,27 @@ Date.prototype.getWeekNumber = function () {
   return Math.ceil(((d - new Date(d.getFullYear(), 0, 1)) / 8.64e7 + 1) / 7);
 };
 
-const url = "http://localhost:5984/zapp-pedidos/";
+//const url = "http://localhost:5984/zapp-pedidos/";
 
-async function getAll() {
-  const response = await axios.post(`${url}_find`, {
-    "selector": {}
-  }, credentials.authentication);
-  return response;
-}
+const urlSemana = "http://localhost:5984/zapp-semanas/";
+
+
 
 export default {
   namespaced: true,
   state: {
     pedido: {
+      _id: "pedido-"+Math.floor(Math.random() * 999999),
       cliente: null,
       ano: new Date().getFullYear(),
       semana: new Date().getWeekNumber(),
       detalle: []
     },
 
+    semanaSeleccionada:null,
+    
 
     //database
-    pedidos: null,
     estilos: null,
     materiales: null,
     tallas: null,
@@ -43,7 +42,16 @@ export default {
     isValid: false
   },
   mutations: {
-
+    actualizarPedidos(state,pedidos){
+      state.semanaSeleccionada.pedidos = pedidos;
+      console.log("actualizando");
+    },
+    setAnoPedido(state, year) {
+      state.pedido.ano = year;
+    },
+    setSemanaPedido(state, semana) {
+      state.pedido.semana = semana;
+    },
 
     setCliente(state, cliente) {
       state.pedido.cliente = cliente;
@@ -134,8 +142,8 @@ export default {
       state.pedido.detalle.push(detalleDefault);
 
     },
-    setPedidos(state, pedidos) {
-      state.pedidos = pedidos;
+    setSemana(state, semana) {
+      state.semanaSeleccionada = semana;
     },
     setData(state, data) {
       state.estilos = data[0].data.docs;
@@ -148,12 +156,9 @@ export default {
 
     },
     clearPedido(state) {
-      state.pedido = {
-        cliente: null,
-        ano: new Date().getFullYear(),
-        semana: new Date().getWeekNumber(),
-        detalle: []
-      };
+
+      state.pedido.cliente = null;
+      state.pedido.detalle = [];
 
     },
 
@@ -185,106 +190,72 @@ export default {
 
   },
   actions: {
-    async getPedidos({
-      commit
+    async getSemana({
+      commit,
+      state
     }) {
-      const res = await axios.post(`${url}_find`, {
-        "selector": {}
+      const res = await axios.post(`${urlSemana}_find`, {
+        "selector": {
+          "semana":state.pedido.semana,
+          "ano":state.pedido.ano
+        }
       }, credentials.authentication);
-      commit('setPedidos', res.data.docs);
+      if (res.statusText == "OK") {
+        if (res.data.docs.length>0) {
+          commit('setSemana', res.data.docs[0]);
+        }else{
+          commit('setSemana', {
+            semana:state.pedido.semana,
+            ano:state.pedido.ano
+          });
+        }
+        console.log(res.statusText );
+      }
+ 
     },
 
     async savePedido({
       commit,
       state
     }) {
-      const res = await axios.post(`${url}_design/manejadorPedidos/_update/agregarPedido`, state.pedido, {
+
+      const resSFind = await axios.post(`http://localhost:5984/zapp-semanas/_find`, {
+        "selector": {
+          "semana": state.pedido.semana,
+          "ano": state.pedido.ano
+        }
+      }, credentials.authentication);
+
+      let semana = resSFind.data.docs[0];
+
+
+      let data = {
+        nuevoPedido: state.pedido,
+        semana: semana || undefined
+      };
+
+      const resSemana = await axios.post(`http://localhost:5984/zapp-semanas/_design/manejadorSemanas/_update/agregarPedido/`, data, {
         "auth": credentials.authentication.auth,
         "headers": credentials.authentication.headers,
       }, credentials.authentication);
 
 
-      if (res.status == 201 || res.status == 200) {
-        let pedido = res.data;
+      if (resSFind.data.docs.length > 0) {
 
-        const resLsFind = await axios.post(`http://localhost:5984/zapp-listas-de-compras/_find`, {
-          "selector": {
-            "semana": pedido.semana,
-            "ano": pedido.ano
-          }
+        await axios.put(`http://localhost:5984/zapp-semanas/${semana._id}/`, resSemana.data, {
+          params: {
+            "rev": semana._rev
+          },
+          "auth": credentials.authentication.auth,
+          "headers": credentials.authentication.headers,
         }, credentials.authentication);
 
-        console.log(resLsFind);
-        if (resLsFind.data.docs.length <= 0) {
-          const resLs = await axios.post(`http://localhost:5984/zapp-listas-de-compras/_design/manejadorListas/_update/agregarLista`, pedido, {
-            "auth": credentials.authentication.auth,
-            "headers": credentials.authentication.headers,
-          }, credentials.authentication);
-          console.log(resLs);
-          console.log("lista creada!");
-        } else {
-          let lista = resLsFind.data.docs[0];
 
-          let detalles = pedido.detalle;
-          detalles.forEach(detalle => {
-
-            detalle.estilo.adornos.forEach(adorno => {
-              if (adorno.cantidad > 0) {
-
-                lista.adornos.forEach(x => {
-                  if (x._id == adorno._id) {
-                    x.cantidad = Number(x.cantidad) + Number(adorno.cantidad);
-                  }
-                });
-              }
-            });
-
-            detalle.estilo.avillos.forEach(avillo => {
-              if (avillo.cantidad > 0) {
-
-
-                lista.avillos.forEach(x => {
-                  if (x._id == avillo._id) {
-                    x.cantidad = Number(x.cantidad) + Number(avillo.cantidad);
-                  }
-                });
-
-              }
-            });
-
-            lista.estilos.push({
-              codigo: detalle.estilo.linea.nombre + detalle.estilo.correlativo,
-              rendimientoPorYarda: detalle.estilo.rendimientoPorYarda,
-              capeyada: detalle.estilo.capeyada
-            });
-            lista.suelas.push(detalle.detalleSuela);
-            lista.tacones.push(detalle.detalleTacon);
-            lista.materiales.push(detalle.detalleMaterial);
-
-          });
-
-          const resLsUp = await axios.put(`http://localhost:5984/zapp-listas-de-compras/${lista._id}/`, lista, {
-            params: {
-              "rev": lista._rev
-            },
-            "auth": credentials.authentication.auth,
-            "headers": credentials.authentication.headers,
-          }, credentials.authentication);
-
-          console.log("exito : " + resLsUp);
-
-        }
-
-        commit('clearPedido');
-        commit('addDetalle');
-        const response = await getAll();
-        commit('setPedidos', response.data.docs);
-
-      } else {
-        console.log(res);
-        console.log("error al guardar");
       }
-      return res;
+      commit('clearPedido');
+      commit('addDetalle');
+      return resSemana;
+
     },
 
     async iniciarDetalle({
@@ -321,12 +292,27 @@ export default {
 
     },
 
+    async actualizarSemana({state}){
+      const res = await axios.put(`http://localhost:5984/zapp-semanas/${state.semanaSeleccionada._id}/`, state.semanaSeleccionada, {
+        params: {
+          "rev": state.semanaSeleccionada._rev
+        },
+        "auth": credentials.authentication.auth,
+        "headers": credentials.authentication.headers,
+      }, credentials.authentication);
+
+      if (res.data.ok) {
+        console.log("actualizada");
+      }
+
+    }
+
 
   },
   getters: {
     detalles: state => state.pedido.detalle,
     cliente: state => state.pedido.cliente,
-    pedidos: state => state.pedidos,
+
 
     estilos: state => state.estilos,
     materiales: state => state.materiales,
@@ -338,10 +324,20 @@ export default {
 
     isPedidoValid: state => state.isValid,
     semana: state => state.pedido.semana,
-    ano: state => state.pedido.ano
+    ano: state => state.pedido.ano,
+
+    semanaSeleccionada: state => state.semanaSeleccionada || {
+      semana:null,
+      ano:null
+    }
   }
 
 }
+
+
+
+
+
 
 
 /*
@@ -350,19 +346,78 @@ function (doc, req) {
   if (!doc) {
     let datos = JSON.parse(req.body);
 
-    datos._id = req.uuid;
+    let nuevoPedido = datos.nuevoPedido;
 
-    if (datos.ano == null) {
-      let fecha = new Date();
-      datos.ano = fecha.getFullYear();
+    
+    let semana = datos.semana || {
+      _id: req.uuid,
+      semana: nuevoPedido.semana,
+      ano: nuevoPedido.ano
+    };
+
+
+    if (semana.pedidos === undefined) {
+      semana.pedidos = [nuevoPedido];
+    } else {
+      semana.pedidos = semana.pedidos.concat(nuevoPedido);
+    }
+    semana.listaDeCompras = calcularLista(semana);
+
+    function calcularLista(psemana) {
+      let pedidos = psemana.pedidos;
+      let lista = psemana.listaDeCompras || {
+        adornos: [],
+        avillos: [],
+        suelas: [],
+        tacones: [],
+        estilos: [],
+        materiales: [],
+      };
+      pedidos.forEach((pedido) => {
+        pedido.detalle.forEach((detalle) => {
+          detalle.estilo.adornos.forEach((adorno) => {
+
+            if (adorno.cantidad > 0) {
+              lista.adornos.push(adorno);
+            }
+          });
+
+          detalle.estilo.avillos.forEach((avillo) => {
+            if (avillo.cantidad > 0) {
+              lista.avillos.push(avillo);
+            }
+          });
+
+          lista.estilos.push({
+            codigo: detalle.estilo.linea.nombre + detalle.estilo.correlativo,
+            rendimientoPorYarda: detalle.estilo.rendimientoPorYarda,
+            capeyada: detalle.estilo.capeyada,
+          });
+          lista.suelas.push(detalle.detalleSuela);
+          lista.tacones.push(detalle.detalleTacon);
+          lista.materiales.push(detalle.detalleMaterial);
+        });
+      });
+
+      return lista;
     }
 
-
-    return [datos, JSON.stringify(datos)]
+    if (datos.semana === undefined) {
+      return [semana, JSON.stringify(semana)]
+    }else{
+      return [null, JSON.stringify(semana)]
+    }
+    
   } else {
-    return [null, 'Ya existe']
+    return [null, 'Error']
   }
 }
+
+
+//////////////////
+
+
+
 
 function (doc, req) {
   if (!doc) {

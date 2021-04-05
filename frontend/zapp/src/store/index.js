@@ -11,7 +11,6 @@ import suelaStore from './modules/suela'
 import hormaStore from './modules/horma'
 import adornoStore from './modules/adorno'
 import avilloStore from './modules/avillo'
-import semanaStore from './modules/semana'
 
 
 import credentials from "./modules/credentials";
@@ -59,7 +58,6 @@ export default new Vuex.Store({
     suela: suelaStore,
     horma: hormaStore,
     adorno: adornoStore,
-    avillo: avilloStore,
-    semana:semanaStore
+    avillo: avilloStore
   }
 })
