@@ -19,15 +19,15 @@ export default {
   namespaced: true,
   state: {
     pedido: {
-      _id: "pedido-"+Math.floor(Math.random() * 999999),
+      _id: "pedido-" + Math.floor(Math.random() * 999999),
       cliente: null,
       ano: new Date().getFullYear(),
       semana: new Date().getWeekNumber(),
       detalle: []
     },
 
-    semanaSeleccionada:null,
-    
+    semanaSeleccionada: null,
+
 
     //database
     estilos: null,
@@ -42,7 +42,10 @@ export default {
     isValid: false
   },
   mutations: {
-    actualizarPedidos(state,pedidos){
+    setRevSemana(state,rev){
+      state.semanaSeleccionada._rev=rev;
+    },
+    actualizarPedidos(state, pedidos) {
       state.semanaSeleccionada.pedidos = pedidos;
       console.log("actualizando");
     },
@@ -157,8 +160,13 @@ export default {
     },
     clearPedido(state) {
 
-      state.pedido.cliente = null;
-      state.pedido.detalle = [];
+      state.pedido = {
+        _id: "pedido-" + Math.floor(Math.random() * 999999),
+        cliente: null,
+        ano: state.pedido.ano,
+        semana: state.pedido.semana,
+        detalle: []
+      }
 
     },
 
@@ -196,22 +204,22 @@ export default {
     }) {
       const res = await axios.post(`${urlSemana}_find`, {
         "selector": {
-          "semana":state.pedido.semana,
-          "ano":state.pedido.ano
+          "semana": state.pedido.semana,
+          "ano": state.pedido.ano
         }
       }, credentials.authentication);
       if (res.statusText == "OK") {
-        if (res.data.docs.length>0) {
+        if (res.data.docs.length > 0) {
           commit('setSemana', res.data.docs[0]);
-        }else{
+        } else {
           commit('setSemana', {
-            semana:state.pedido.semana,
-            ano:state.pedido.ano
+            semana: state.pedido.semana,
+            ano: state.pedido.ano
           });
         }
-        console.log(res.statusText );
+        console.log(res.statusText);
       }
- 
+
     },
 
     async savePedido({
@@ -249,7 +257,6 @@ export default {
           "auth": credentials.authentication.auth,
           "headers": credentials.authentication.headers,
         }, credentials.authentication);
-
 
       }
       commit('clearPedido');
@@ -292,7 +299,9 @@ export default {
 
     },
 
-    async actualizarSemana({state}){
+    async actualizarSemana({
+      state,commit
+    }) {
       const res = await axios.put(`http://localhost:5984/zapp-semanas/${state.semanaSeleccionada._id}/`, state.semanaSeleccionada, {
         params: {
           "rev": state.semanaSeleccionada._rev
@@ -303,6 +312,7 @@ export default {
 
       if (res.data.ok) {
         console.log("actualizada");
+        commit('setRevSemana',res.data.rev);
       }
 
     }
@@ -327,8 +337,8 @@ export default {
     ano: state => state.pedido.ano,
 
     semanaSeleccionada: state => state.semanaSeleccionada || {
-      semana:null,
-      ano:null
+      semana: null,
+      ano: null
     }
   }
 
@@ -336,209 +346,3 @@ export default {
 
 
 
-
-
-
-
-/*
-
-function (doc, req) {
-  if (!doc) {
-    let datos = JSON.parse(req.body);
-
-    let nuevoPedido = datos.nuevoPedido;
-
-    
-    let semana = datos.semana || {
-      _id: req.uuid,
-      semana: nuevoPedido.semana,
-      ano: nuevoPedido.ano
-    };
-
-
-    if (semana.pedidos === undefined) {
-      semana.pedidos = [nuevoPedido];
-    } else {
-      semana.pedidos = semana.pedidos.concat(nuevoPedido);
-    }
-    semana.listaDeCompras = calcularLista(semana);
-
-    function calcularLista(psemana) {
-      let pedidos = psemana.pedidos;
-      let lista = psemana.listaDeCompras || {
-        adornos: [],
-        avillos: [],
-        suelas: [],
-        tacones: [],
-        estilos: [],
-        materiales: [],
-      };
-      pedidos.forEach((pedido) => {
-        pedido.detalle.forEach((detalle) => {
-          detalle.estilo.adornos.forEach((adorno) => {
-
-            if (adorno.cantidad > 0) {
-              lista.adornos.push(adorno);
-            }
-          });
-
-          detalle.estilo.avillos.forEach((avillo) => {
-            if (avillo.cantidad > 0) {
-              lista.avillos.push(avillo);
-            }
-          });
-
-          lista.estilos.push({
-            codigo: detalle.estilo.linea.nombre + detalle.estilo.correlativo,
-            rendimientoPorYarda: detalle.estilo.rendimientoPorYarda,
-            capeyada: detalle.estilo.capeyada,
-          });
-          lista.suelas.push(detalle.detalleSuela);
-          lista.tacones.push(detalle.detalleTacon);
-          lista.materiales.push(detalle.detalleMaterial);
-        });
-      });
-
-      return lista;
-    }
-
-    if (datos.semana === undefined) {
-      return [semana, JSON.stringify(semana)]
-    }else{
-      return [null, JSON.stringify(semana)]
-    }
-    
-  } else {
-    return [null, 'Error']
-  }
-}
-
-
-//////////////////
-
-
-
-
-function (doc, req) {
-  if (!doc) {
-    let datos = JSON.parse(req.body);
-    let id = datos.id;
-    let estilos = datos.estilos;
-    let adornos = datos.adornos;
-    let avillos = datos.avillos;
-    let suelas = datos.suelas;
-    let tacones = datos.tacones;
-    let materiales = datos.materiales;
-
-
-    let detalles = datos.detalle;
-    detalles.forEach(detalle => {
-
-      detalle.estilo.adornos.forEach(adorno => {
-        if (adorno.cantidad > 0) {
-          adornos.push(adorno);
-        }
-      });
-
-      detalle.estilo.avillos.forEach(avillo => {
-        if (avillo.cantidad > 0) {
-          avillos.push(avillo);
-        }
-      });
-
-      estilos.push({
-        codigo: detalle.estilo.linea.nombre + detalle.estilo.correlativo,
-        rendimientoPorYarda: detalle.estilo.rendimientoPorYarda,
-        capeyada: detalle.estilo.capeyada
-      });
-      suelas.push(detalle.detalleSuela);
-      tacones.push(detalle.detalleTacon);
-      materiales.push(detalle.detalleMaterial);
-
-    });
-
-
-    lista = {
-      '_id': id,
-      'adornos': adornos,
-      'avillos': avillos,
-      'semana': datos.semana,
-      'ano': datos.ano,
-      'suelas': suelas,
-      'tacones': tacones,
-      'estilos': estilos,
-      'materiales': materiales
-    };
-    return [lista, 'lista guardado!']
-
-
-  } else {
-    return [null, 'Ya existe']
-  }
-
-}
-
-
-function semanaDelAno() {
-  let constantes = [2, 1, 7, 6, 5, 4, 3];
-  let fecha = new Date();
-
-  let dia = fecha.getDate();
-  console.log("dia: " + dia);
-
-  let mes = fecha.getMonth();
-  mes++;
-  console.log("mes: " + mes);
-
-  let ano = fecha.getFullYear();
-  if (mes != 0) {
-    mes--;
-  }
-  console.log("ano: " + ano);
-
-  let dia_pri = new Date(ano, 0, 1);
-  dia_pri = dia_pri.getDay();
-  // Obtenemos el dia de la semana del 1 de enero
-  dia_pri = eval(constantes[dia_pri]);
-  // Obtenemos el valor de la constante correspondiente al día
-  let tiempo0 = new Date(ano, 0, dia_pri);
-  // Establecemos la fecha del primer dia de la semana del año
-  dia = dia + dia_pri;
-  // Sumamos el valor de la constante a la fecha ingresada para mantener
-  // los lapsos de tiempo
-  let tiempo1 = new Date(ano, mes, dia);
-  // Obtenemos la fecha con la que operaremos
-  let lapso = tiempo1 - tiempo0;
-  // Restamos ambas fechas y obtenemos una marca de tiempo
-  let semanas = Math.floor(lapso / 1000 / 60 / 60 / 24 / 7);
-  // Dividimos la marca de tiempo para obtener el numero de semanas
-  if (dia_pri == 1) {
-    semanas++;
-  }
-
-  // Si el 1 de enero es lunes le sumamos 1 a la semana caso contrarios el
-  // calculo nos daria 0 y nos presentaria la semana como semana 52 del
-  // año anterior
-
-  if (semanas == 0) {
-    semanas = 52;
-    ano--;
-  }
-  // Establecemos que si el resultado de semanas es 0 lo cambie a 52 y
-  // reste 1 al año esto funciona para todos los años en donde el 1 de
-  // Enero no es Lunes
-
-  if (ano < 10) {
-    ano = "0" + ano;
-  }
-  // Por pura estetica establecemos que si el año es menor de 10, aumente
-  // un 0 por delante, esto para aquellos que ingresen formato de fecha
-  // corto dd/mm/yy
-
-  return semanas;
-}
-
-
-
-
-*/

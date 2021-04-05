@@ -166,11 +166,8 @@ export default {
   mounted() {},
   methods: {
     ...mapActionsPedido(["actualizarSemana"]),
-    onEnd(evt) {
+    onEnd() {
       this.actualizarSemana();
-      console.log(evt);
-      //this.oldIndex = evt.oldIndex;
-      //this.newIndex = evt.newIndex;
     },
     total(detalle) {
       let sum = 0;
